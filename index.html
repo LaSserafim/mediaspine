@@ -86,6 +86,58 @@
     .dashboard.good #status-text { color: #34d399; }
     .dashboard.bad #angle-val,
     .dashboard.bad #status-text  { color: #fb7185; }
+
+    /* ── Password Modal ────────────────────────────────────────────── */
+    #pw-modal {
+      display: none;
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+    }
+    #pw-modal.open { display: flex; animation: fadeIn .2s ease-out; }
+    #pw-box {
+      background: linear-gradient(135deg, rgba(30,41,59,.95) 0%, rgba(15,23,42,.98) 100%);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      width: min(360px, 90vw);
+      box-shadow: 0 32px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(139,92,246,.2);
+      text-align: center;
+    }
+    #pw-box h2 { font-size: 1.4rem; font-weight: 800; color: #e2e8f0; margin-bottom: .25rem; }
+    #pw-box p  { font-size: .875rem; color: #94a3b8; margin-bottom: 1.5rem; }
+    #pw-input {
+      width: 100%; padding: .75rem 1rem;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 12px;
+      color: #f1f5f9; font-size: 1.1rem; letter-spacing: .15em;
+      text-align: center; outline: none;
+      transition: border-color .2s;
+    }
+    #pw-input:focus { border-color: rgba(139,92,246,.6); }
+    #pw-error {
+      color: #fb7185; font-size: .8rem; min-height: 1.2em;
+      margin-top: .5rem; margin-bottom: .75rem;
+    }
+    #pw-submit {
+      width: 100%; padding: .75rem;
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      border: none; border-radius: 12px;
+      color: #fff; font-weight: 700; font-size: 1rem;
+      cursor: pointer; margin-top: .25rem;
+      transition: opacity .2s, transform .15s;
+    }
+    #pw-submit:hover { opacity: .9; transform: scale(1.02); }
+    #pw-cancel {
+      background: none; border: none; color: #64748b;
+      font-size: .8rem; cursor: pointer; margin-top: .75rem;
+      display: block; width: 100%;
+    }
+    #pw-cancel:hover { color: #94a3b8; }
   </style>
 </head>
 <body>
@@ -134,7 +186,7 @@
           <button id="btn" onclick="startCamera()" class="px-8 py-3 rounded-full font-bold text-slate-900 bg-gradient-to-r from-teal-300 to-blue-400 hover:scale-105 hover:shadow-[0_0_20px_rgba(59,130,246,0.5)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
             Start Camera
           </button>
-          <button id="ai-btn" onclick="startAIEvaluation()" disabled class="px-8 py-3 rounded-full font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
+          <button id="ai-btn" onclick="showPasswordModal()" disabled class="px-8 py-3 rounded-full font-bold text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:scale-105 hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100">
             Take Snapshot &amp; AI Evaluation
           </button>
         </div>
@@ -271,15 +323,8 @@
     /* ═══════════════════════════════════════════════════════════════════
        CONFIGURATION
     ═══════════════════════════════════════════════════════════════════ */
-    // API key is NOT stored in source code.
-    // It is requested from the user at runtime and kept only in memory.
-    let GROQ_API_KEY = '';
-    function getGroqKey() {
-      if (!GROQ_API_KEY) {
-        GROQ_API_KEY = prompt('Enter your Groq API key to enable AI Evaluation:\n(It is stored only in memory and never sent anywhere except api.groq.com)') || '';
-      }
-      return GROQ_API_KEY;
-    }
+    // API key is stored server-side as a Vercel environment variable.
+    // It is never sent to or accessible by the browser.
 
     /* ═══════════════════════════════════════════════════════════════════
        DOM REFS
@@ -329,6 +374,7 @@
        STATE
     ═══════════════════════════════════════════════════════════════════ */
     let isProcessing    = false;   // FRAME LOCK — prevents overlapping sends
+    let frameCounter    = 0;       // throttle FaceMesh to every 3rd frame
     let cameraInstance  = null;
     let currentLandmarks = null;
     let latestMetrics   = null;
@@ -504,13 +550,14 @@
     /**
      * Called by both onResults callbacks.
      * Merges once BOTH results are ready, updates DOM, then releases the frame lock.
+     * On throttled (face-skipped) frames, pendingFace is pre-set, so this resolves immediately.
      */
     function tryMergeAndUpdate() {
       if (!pendingPose || !pendingFace) return; // wait for the other model
 
       const merged = { ...pendingPose, ...pendingFace };
-      pendingPose = null;
-      pendingFace = null;
+      pendingPose  = null;
+      // keep pendingFace alive so throttled frames can reuse the last face result
       isProcessing = false;           // ← release frame lock AFTER both results are in
 
       latestMetrics = merged;
@@ -623,28 +670,31 @@
       if (!cameraInstance) {
         cameraInstance = new Camera(video, {
           facingMode: 'user',
-          width:  640,
-          height: 480,
+          width:  480,   // reduced from 640 — less pixels to process per frame
+          height: 360,
           onFrame: async () => {
             // FRAME LOCK: skip this frame entirely if still processing the last one
             if (isProcessing) return;
             if (video.videoWidth === 0 || video.videoHeight === 0) return;
 
             isProcessing = true;
+            frameCounter++;
             pendingPose  = null;
-            pendingFace  = null;
+
+            // FaceMesh throttle: run every 3rd frame — it's the heavier model.
+            // On skipped frames, reuse the last known face result.
+            const runFace = (frameCounter % 3 === 0);
+            if (!runFace) pendingFace = pendingFace ?? { faceDetected: false };
 
             try {
-              // Sequential send — avoids shared WASM memory contention
               await pose.send({ image: video });
-              await faceMesh.send({ image: video });
-              // isProcessing is released inside tryMergeAndUpdate()
-              // after BOTH onResults callbacks have fired.
+              if (runFace) await faceMesh.send({ image: video });
+              // isProcessing released inside tryMergeAndUpdate() once both are ready.
             } catch (err) {
               console.error('[main] Frame processing error:', err);
-              isProcessing = false;   // release lock on error
+              isProcessing = false;
               pendingPose  = null;
-              pendingFace  = null;
+              if (runFace) pendingFace = null;
             }
           }
         });
@@ -768,27 +818,11 @@
           `Facial Emotion: ${dominantEmotion}`
         ].filter(Boolean).join(', ');
 
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        // Call our own serverless proxy — the API key never touches the browser.
+        const response = await fetch('/api/evaluate', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${getGroqKey()}`,
-            'Content-Type':  'application/json'
-          },
-          body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
-            messages: [
-              {
-                role: 'system',
-                content: 'You are a clinical biomechanics AI. You will receive raw numerical data for Neck Deviation, Shoulder Tilt, Shoulder Stability (variance), Head Stability, Micro-Stress Level (%), and Facial Emotion. You MUST output ONLY a JSON object with three keys: "current_issues", "future_risks", and "recommendations".\nRules:\n- You MUST cite the exact degrees, numerical variance, stress levels, and emotion in your analysis.\n- You MUST heavily weight the micro-stress level and facial emotion when generating your analysis and recommendations.\n- You MUST classify the severity (e.g., Mild: <5°, Moderate: 5°-15°, Severe: >15°).\n- In "current_issues", explain the exact anatomical impact (e.g., asymmetrical loading on the trapezius, cervical spine strain) and correlate it with the observed stress/emotion.\n- In "future_risks", provide a projected timeline and how chronic stress/emotion might exacerbate musculoskeletal issues.\n- In "recommendations", provide exactly 3 specific, actionable ergonomic fixes or targeted stretches addressing both physical posture and mental tension.'
-              },
-              {
-                role: 'user',
-                content: `Here is the raw numerical data: ${userPayload}.`
-              }
-            ],
-            response_format: { type: 'json_object' },
-            temperature: 0.1
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ payload: userPayload })
         });
 
         if (!response.ok) throw new Error(`API Error: ${response.status}`);
@@ -860,6 +894,53 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
+  </script>
+
+  <!-- Password Gate Modal -->
+  <div id="pw-modal" role="dialog" aria-modal="true" aria-labelledby="pw-title">
+    <div id="pw-box">
+      <h2 id="pw-title">🔒 Access Required</h2>
+      <p>Enter the access password to run the AI evaluation.</p>
+      <input id="pw-input" type="password" placeholder="••••••••"
+             autocomplete="off" aria-label="Access password"
+             onkeydown="if(event.key==='Enter')submitPassword()">
+      <div id="pw-error" aria-live="polite"></div>
+      <button id="pw-submit" onclick="submitPassword()">Unlock AI Evaluation</button>
+      <button id="pw-cancel" onclick="closePasswordModal()">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const PW_MODAL  = document.getElementById('pw-modal');
+    const PW_INPUT  = document.getElementById('pw-input');
+    const PW_ERROR  = document.getElementById('pw-error');
+    const CORRECT_PW = '12345';
+
+    function showPasswordModal() {
+      if (!currentLandmarks || isRecording) return;
+      PW_INPUT.value  = '';
+      PW_ERROR.textContent = '';
+      PW_MODAL.classList.add('open');
+      setTimeout(() => PW_INPUT.focus(), 50);
+    }
+
+    function closePasswordModal() {
+      PW_MODAL.classList.remove('open');
+    }
+
+    function submitPassword() {
+      if (PW_INPUT.value === CORRECT_PW) {
+        closePasswordModal();
+        startAIEvaluation();
+      } else {
+        PW_ERROR.textContent = 'Incorrect password. Try again.';
+        PW_INPUT.value = '';
+        PW_INPUT.focus();
+      }
+    }
+
+    // Close on backdrop click
+    PW_MODAL.addEventListener('click', (e) => { if (e.target === PW_MODAL) closePasswordModal(); });
   </script>
 </body>
 </html>
