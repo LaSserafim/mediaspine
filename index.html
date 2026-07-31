@@ -269,6 +269,19 @@
         </div>
 
         <div id="ai-results" style="display:none;" class="space-y-8">
+
+          <!-- Summary + Severity banner -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="md:col-span-3 bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-white/10">
+              <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">Clinical Summary</p>
+              <p id="ai-summary" class="text-slate-100 text-base leading-relaxed"></p>
+            </div>
+            <div class="bg-white/5 backdrop-blur-md rounded-2xl p-5 border border-white/10 flex flex-col items-center justify-center text-center">
+              <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">Severity</p>
+              <span id="ai-severity" class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"></span>
+            </div>
+          </div>
+
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Current Issues -->
             <div class="bg-red-500/5 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-red-500/20 shadow-[inset_0_0_20px_rgba(239,68,68,0.05)] hover:bg-red-500/10 transition-colors duration-300">
@@ -298,7 +311,7 @@
                 </div>
                 <strong class="text-emerald-400 text-lg uppercase tracking-widest">Recommendations</strong>
               </div>
-              <p id="ai-recommendations" class="text-slate-200 text-base leading-relaxed"></p>
+              <ol id="ai-recommendations" class="text-slate-200 text-base leading-relaxed space-y-4 list-none"></ol>
             </div>
           </div>
 
@@ -834,19 +847,48 @@
 
         const safeText = (val) => {
           if (!val) return 'N/A';
-          if (Array.isArray(val)) return val.join(', ');
-          if (typeof val === 'object') {
-            const first = Object.values(val)[0];
-            return first && typeof first === 'string' ? first : JSON.stringify(val);
-          }
+          if (Array.isArray(val)) return val.join(' | ');
+          if (typeof val === 'object') return JSON.stringify(val);
           return String(val);
+        };
+
+        const aiSummary      = document.getElementById('ai-summary');
+        const aiSeverity     = document.getElementById('ai-severity');
+        const aiRecommendOl  = document.getElementById('ai-recommendations');
+
+        // Severity colour map
+        const severityColour = {
+          'Normal':            'from-emerald-400 to-teal-400',
+          'Very Mild':         'from-teal-400 to-cyan-400',
+          'Mild':              'from-yellow-400 to-amber-400',
+          'Moderate':          'from-orange-400 to-amber-500',
+          'Moderately Severe': 'from-red-400 to-orange-500',
+          'Severe':            'from-red-500 to-rose-600'
         };
 
         aiStatus.style.display  = 'none';
         aiResults.style.display = 'block';
-        aiCurrent.textContent   = safeText(parsed.current_issues);
-        aiFuture.textContent    = safeText(parsed.future_risks);
-        aiRecommend.textContent = safeText(parsed.recommendations);
+
+        if (aiSummary)  aiSummary.textContent  = safeText(parsed.summary);
+        if (aiSeverity) {
+          aiSeverity.textContent = safeText(parsed.severity);
+          const grad = severityColour[parsed.severity] || 'from-purple-400 to-pink-400';
+          aiSeverity.className = `text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r ${grad}`;
+        }
+        aiCurrent.textContent  = safeText(parsed.current_issues);
+        aiFuture.textContent   = safeText(parsed.future_risks);
+
+        // Recommendations: render as numbered list if array
+        aiRecommendOl.innerHTML = '';
+        const recs = Array.isArray(parsed.recommendations)
+          ? parsed.recommendations
+          : [safeText(parsed.recommendations)];
+        recs.forEach((rec, i) => {
+          const li = document.createElement('li');
+          li.className = 'flex gap-3 items-start';
+          li.innerHTML = `<span class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex items-center justify-center mt-0.5">${i + 1}</span><span>${rec}</span>`;
+          aiRecommendOl.appendChild(li);
+        });
 
         lastAIData = { metrics, parsed, timestamp: new Date() };
 
@@ -881,7 +923,7 @@
       };
 
       const tsStr = timestamp.toLocaleString().replace(/,/g, '');
-      const csv   = `Timestamp,Captured Metrics,Current Issues,Future Risks,Recommendations\n"${tsStr}","${metricsFmt}",${esc(parsed.current_issues)},${esc(parsed.future_risks)},${esc(parsed.recommendations)}\n`;
+      const csv = `Timestamp,Severity,Captured Metrics,Summary,Current Issues,Future Risks,Recommendations\n"${tsStr}",${esc(parsed.severity)},"${metricsFmt}",${esc(parsed.summary)},${esc(parsed.current_issues)},${esc(parsed.future_risks)},${esc(Array.isArray(parsed.recommendations) ? parsed.recommendations.join(' | ') : parsed.recommendations)}\n`;
 
       const blob  = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url   = URL.createObjectURL(blob);
