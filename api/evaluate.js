@@ -37,7 +37,7 @@ You will receive numerical metrics such as:
 - Head Tilt (degrees)
 - Shoulder Stability
 - Head Stability
-- Micro-Stress Level (%)
+- Facial Tension Index (%)
 - Detected Emotion
 
 Always use every measurement available. Never ignore a metric.
@@ -105,7 +105,7 @@ BIOMECHANICAL INTERPRETATION
 Neck Deviation: 0-5 degrees Normal | 5-10 degrees Very Mild | 10-15 degrees Mild | 15-20 degrees Moderate | 20+ degrees Severe
 Shoulder Tilt: 0-2 degrees Normal | 2-4 degrees Mild | 4-7 degrees Moderate | 7+ degrees High
 Head Tilt: 0-2 degrees Normal | 2-4 degrees Mild | 4-7 degrees Moderate | 7+ degrees Severe
-Micro-Stress: 0-20% Very Low | 20-40% Low | 40-60% Moderate | 60-80% High | 80-100% Very High
+Facial Tension Index: 0-20% Very Low | 20-40% Low | 40-60% Moderate | 60-80% High | 80-100% Very High
 Stability: Lower variance = better postural control. Higher variance = reduced endurance or inconsistent muscular control.
 
 --------------------------------------------------

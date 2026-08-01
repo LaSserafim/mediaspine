@@ -230,7 +230,7 @@
             <span id="val-bps" class="text-xl font-bold tabular-nums text-emerald-300">0.00</span>
           </div>
           <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col justify-center items-center text-center shadow-lg hover:bg-white/10 transition-all duration-300">
-            <span class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Micro-Stress Level</span>
+            <span class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Facial Tension Index</span>
             <span id="val-stress" class="text-xl font-bold tabular-nums text-red-400">--%</span>
           </div>
           <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col justify-center items-center text-center shadow-lg hover:bg-white/10 transition-all duration-300">
@@ -387,7 +387,7 @@
        STATE
     ═══════════════════════════════════════════════════════════════════ */
     let isProcessing    = false;   // FRAME LOCK — prevents overlapping sends
-    let frameCounter    = 0;       // throttle FaceMesh to every 3rd frame
+    let frameCounter    = 0;       // throttle FaceMesh to every 2nd frame (eye blink needs ≥15 fps)
     let cameraInstance  = null;
     let currentLandmarks = null;
     let latestMetrics   = null;
@@ -414,25 +414,92 @@
     let marHistory  = [];
     let browHistory = [];
     const HISTORY_LIMIT    = 30;
+    // Fallback fixed constants — used only when no personal baseline exists.
     const EAR_MAX_VARIANCE  = 0.2;
     const MAR_MAX_VARIANCE  = 0.1;
     const BROW_MAX_VARIANCE = 0.05;
 
+    // EMA pre-smoothing — reduces MediaPipe jitter before variance is computed.
+    // α = 0.3: new value contributes 30 %, previous EMA 70 %. Named for easy tuning.
+    const EMA_ALPHA = 0.3;
+    let earEma  = null;  // null until first frame
+    let marEma  = null;
+    let browEma = null;
+
+    // Personal baseline: { earMean, earStd, marMean, marStd, browMean, browStd }
+    // Captured at the end of the 3-second stability snapshot.
+    // null → not yet calibrated; fallback constants are used instead.
+    let stressBaseline = null;
+
     /* ═══════════════════════════════════════════════════════════════════
-       MOCK BLINK TRACKER
+       REAL BLINK DETECTOR  (EAR threshold-crossing state machine)
     ═══════════════════════════════════════════════════════════════════ */
-    let blinkCount = 0;
-    let blinkSessionStartTime = Date.now();
-    setInterval(() => {
-      if (currentLandmarks && cameraInstance) {
-        if (Math.random() > 0.6) blinkCount += Math.floor(Math.random() * 2) + 1;
-        valBlinkCount.textContent = blinkCount;
-        const elapsed = (Date.now() - blinkSessionStartTime) / 1000;
-        if (elapsed > 0) valBps.textContent = (blinkCount / elapsed).toFixed(2);
-      } else {
-        blinkSessionStartTime = Date.now();
+    const EAR_THRESH    = 0.21;   // eyes considered closed below this value
+    const REFRACTORY_MS = 150;    // min ms between counted blinks
+    const BPS_WINDOW_MS = 10000;  // rolling window for blinks-per-second
+
+    // Canonical 6-point EAR landmark indices for MediaPipe FaceMesh
+    const LEFT_EYE  = [362, 385, 387, 263, 373, 380];
+    const RIGHT_EYE = [33,  160, 158, 133, 153, 144];
+
+    let blinkCount    = 0;
+    let blinkState    = 'open';   // 'open' | 'closed'
+    let lastBlinkTime = 0;        // timestamp of last counted blink
+    const blinkTimestamps = [];   // rolling list of blink event times (for BPS)
+
+    /**
+     * Compute the Eye Aspect Ratio for a single eye using the standard
+     * 6-point formula: EAR = (||p2-p6|| + ||p3-p5||) / (2 * ||p1-p4||)
+     * where indices map to: p1=corner, p2/p6=upper/lower vertical pair 1,
+     * p3/p5=upper/lower vertical pair 2, p4=opposite corner.
+     * @param {Array} lm  - FaceMesh landmark array
+     * @param {number[]} idx - 6 landmark indices [p1,p2,p3,p4,p5,p6]
+     */
+    function eyeAspectRatio(lm, idx) {
+      const v1 = dist(lm[idx[1]], lm[idx[5]]);
+      const v2 = dist(lm[idx[2]], lm[idx[4]]);
+      const h  = dist(lm[idx[0]], lm[idx[3]]);
+      return safeDivide(v1 + v2, 2.0 * h);
+    }
+
+    /**
+     * Average EAR over both eyes from a FaceMesh landmark array.
+     * @param {Array} lm - FaceMesh landmark array
+     * @returns {number} mean EAR [0, ~0.4]
+     */
+    function computeEAR(lm) {
+      return (eyeAspectRatio(lm, LEFT_EYE) + eyeAspectRatio(lm, RIGHT_EYE)) / 2;
+    }
+
+    /**
+     * State-machine blink detector. Call once per FaceMesh frame.
+     * Increments blinkCount on closed→open transition outside the refractory
+     * window. Updates valBlinkCount and valBps live.
+     * @param {Array} lm - FaceMesh landmark array
+     */
+    function detectBlink(lm) {
+      const ear = computeEAR(lm);
+      const now = performance.now();
+
+      if (ear < EAR_THRESH) {
+        blinkState = 'closed';
+      } else if (blinkState === 'closed') {
+        // Transition: closed → open
+        blinkState = 'open';
+        if (now - lastBlinkTime >= REFRACTORY_MS) {
+          lastBlinkTime = now;
+          blinkCount++;
+          blinkTimestamps.push(now);
+        }
       }
-    }, 2000);
+
+      // Prune timestamps outside the rolling window
+      const cutoff = now - BPS_WINDOW_MS;
+      while (blinkTimestamps.length && blinkTimestamps[0] < cutoff) blinkTimestamps.shift();
+
+      valBlinkCount.textContent = blinkCount;
+      valBps.textContent = (blinkTimestamps.length / (BPS_WINDOW_MS / 1000)).toFixed(2);
+    }
 
     /* ═══════════════════════════════════════════════════════════════════
        MATH HELPERS
@@ -478,33 +545,81 @@
     }
 
     /* ─── FaceMesh Math ─────────────────────────────────────────────── */
+
+    /**
+     * Compute mean and stddev of an array. Returns { mean, std }.
+     * Used by calibrateBaseline(); not needed at runtime beyond that.
+     */
+    function arrayStats(arr) {
+      if (!arr.length) return { mean: 0, std: 1 };
+      const mean = arr.reduce((s, v) => s + v, 0) / arr.length;
+      const std  = Math.sqrt(arr.reduce((s, v) => s + (v - mean) ** 2, 0) / arr.length) || 1e-6;
+      return { mean, std };
+    }
+
+    /**
+     * Snapshot the current rolling histories as the personal resting baseline.
+     * Called once at the end of the 3-second stability countdown.
+     * The rolling histories already contain the most-recent HISTORY_LIMIT frames
+     * of EMA-smoothed values — exactly the window we want for resting variance.
+     */
+    function calibrateBaseline() {
+      if (earHistory.length < 5 || marHistory.length < 5 || browHistory.length < 5) return;
+      const earS  = arrayStats(earHistory);
+      const marS  = arrayStats(marHistory);
+      const browS = arrayStats(browHistory);
+      stressBaseline = {
+        earMean:  earS.mean,  earStd:  earS.std,
+        marMean:  marS.mean,  marStd:  marS.std,
+        browMean: browS.mean, browStd: browS.std
+      };
+    }
+
     function extractFaceMetrics(lm) {
       // EAR
       const leftEyeWidth  = dist(lm[33],  lm[133]);
       const rightEyeWidth = dist(lm[362], lm[263]);
       const leftEAR  = safeDivide(dist(lm[160], lm[144]) + dist(lm[158], lm[153]), 2.0 * leftEyeWidth);
       const rightEAR = safeDivide(dist(lm[385], lm[380]) + dist(lm[387], lm[373]), 2.0 * rightEyeWidth);
-      const ear = (leftEAR + rightEAR) / 2.0;
+      const rawEar = (leftEAR + rightEAR) / 2.0;
 
       // MAR
       const mouthWidth = dist(lm[78], lm[308]);
-      const mar = safeDivide(dist(lm[13], lm[14]), mouthWidth);
+      const rawMar = safeDivide(dist(lm[13], lm[14]), mouthWidth);
 
       // Brow tension
-      const browTension = dist(lm[55], lm[285]);
+      const rawBrow = dist(lm[55], lm[285]);
 
-      // Rolling history
-      earHistory.push(ear);
-      marHistory.push(mar);
-      browHistory.push(browTension);
+      // EMA smoothing — suppress per-frame MediaPipe jitter before computing variance.
+      // earEma / marEma / browEma are null on the very first frame; seed them to raw value.
+      earEma  = earEma  === null ? rawEar  : EMA_ALPHA * rawEar  + (1 - EMA_ALPHA) * earEma;
+      marEma  = marEma  === null ? rawMar  : EMA_ALPHA * rawMar  + (1 - EMA_ALPHA) * marEma;
+      browEma = browEma === null ? rawBrow : EMA_ALPHA * rawBrow + (1 - EMA_ALPHA) * browEma;
+
+      // Rolling history (smoothed values only)
+      earHistory.push(earEma);
+      marHistory.push(marEma);
+      browHistory.push(browEma);
       if (earHistory.length  > HISTORY_LIMIT) earHistory.shift();
       if (marHistory.length  > HISTORY_LIMIT) marHistory.shift();
       if (browHistory.length > HISTORY_LIMIT) browHistory.shift();
 
-      // Stress 0-100
-      const earStress  = Math.min(safeDivide(calcVariance(earHistory),  EAR_MAX_VARIANCE),  1);
-      const marStress  = Math.min(safeDivide(calcVariance(marHistory),  MAR_MAX_VARIANCE),  1);
-      const browStress = Math.min(safeDivide(calcVariance(browHistory), BROW_MAX_VARIANCE), 1);
+      // Stress 0-100 — baseline-relative when calibrated, fixed-constant fallback otherwise.
+      let earStress, marStress, browStress;
+      if (stressBaseline) {
+        // score = clamp((current_variance − baseline_mean) / baseline_std, 0, 3) / 3
+        const earVar  = calcVariance(earHistory);
+        const marVar  = calcVariance(marHistory);
+        const browVar = calcVariance(browHistory);
+        earStress  = Math.min(Math.max((earVar  - stressBaseline.earMean)  / stressBaseline.earStd,  0), 3) / 3;
+        marStress  = Math.min(Math.max((marVar  - stressBaseline.marMean)  / stressBaseline.marStd,  0), 3) / 3;
+        browStress = Math.min(Math.max((browVar - stressBaseline.browMean) / stressBaseline.browStd, 0), 3) / 3;
+      } else {
+        // No baseline yet — use fixed population constants so the meter is never broken.
+        earStress  = Math.min(safeDivide(calcVariance(earHistory),  EAR_MAX_VARIANCE),  1);
+        marStress  = Math.min(safeDivide(calcVariance(marHistory),  MAR_MAX_VARIANCE),  1);
+        browStress = Math.min(safeDivide(calcVariance(browHistory), BROW_MAX_VARIANCE), 1);
+      }
       const stressLevel = Math.round(((earStress + marStress + browStress) / 3) * 100);
 
       // Emotion curvature
@@ -515,7 +630,7 @@
                     : emotionCurvature < -0.005 ? 'Tense/Sad'
                     : 'Neutral';
 
-      return { faceDetected: true, ear, mar, browTension, stressLevel, emotion };
+      return { faceDetected: true, ear: rawEar, mar: rawMar, browTension: rawBrow, stressLevel, emotion, _faceLandmarks: lm };
     }
 
     /* ═══════════════════════════════════════════════════════════════════
@@ -555,8 +670,8 @@
 
     faceMesh.onResults((results) => {
       pendingFace = (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0)
-        ? extractFaceMetrics(results.multiFaceLandmarks[0])
-        : { faceDetected: false };
+        ? { ...extractFaceMetrics(results.multiFaceLandmarks[0]), _freshLandmarks: true }
+        : { faceDetected: false, _freshLandmarks: true };
       tryMergeAndUpdate();
     });
 
@@ -667,9 +782,12 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
 
-      // Stress & Emotion (always update when FaceMesh runs)
+      // Stress, Emotion & Blink (always update when FaceMesh runs)
       if (metrics.stressLevel !== undefined) valStress.textContent = metrics.stressLevel.toFixed(0) + '%';
       if (metrics.emotion)                    valEmotion.textContent = metrics.emotion;
+      // Only run detectBlink on fresh FaceMesh frames; stale replays have identical
+      // EAR and cannot contribute new state transitions — skip them to avoid noise.
+      if (metrics.faceDetected && metrics._faceLandmarks && metrics._freshLandmarks) detectBlink(metrics._faceLandmarks);
     }
 
     /* ═══════════════════════════════════════════════════════════════════
@@ -694,10 +812,16 @@
             frameCounter++;
             pendingPose  = null;
 
-            // FaceMesh throttle: run every 3rd frame — it's the heavier model.
-            // On skipped frames, reuse the last known face result.
-            const runFace = (frameCounter % 3 === 0);
-            if (!runFace) pendingFace = pendingFace ?? { faceDetected: false };
+            // FaceMesh throttle: run every 2nd frame (~15 fps) — doubles eye-landmark
+            // sampling vs the former every-3rd (~10 fps), so a 100–400 ms blink is
+            // reliably caught. The full 468-landmark posture path also benefits.
+            // On skipped frames, reuse the last known face result but clear the
+            // freshness flag so detectBlink does not fire on stale data.
+            const runFace = (frameCounter % 2 === 0);
+            if (!runFace) {
+              if (pendingFace) pendingFace = { ...pendingFace, _freshLandmarks: false };
+              else             pendingFace = { faceDetected: false, _freshLandmarks: false };
+            }
 
             try {
               await pose.send({ image: video });
@@ -717,6 +841,14 @@
         .then(() => {
           btn.textContent      = 'Camera Active';
           statusEl.textContent = 'Tracking pose…';
+          // Reset blink state on every successful camera (re)start so count and
+          // BPS don't bleed across sessions or camera permission re-prompts.
+          blinkCount = 0;
+          blinkState = 'open';
+          lastBlinkTime = 0;
+          blinkTimestamps.length = 0;
+          valBlinkCount.textContent = '0';
+          valBps.textContent = '0.00';
         })
         .catch((e) => {
           btn.disabled    = false;
@@ -760,6 +892,7 @@
           countdownNumber.textContent  = '✓';
           countdownMessage.textContent = 'ANALYZING';
           isRecording = false;
+          calibrateBaseline(); // snapshot rolling histories as personal resting baseline
 
           // Compute stability stats from recorded data
           const sMax = Math.max(...shoulderYData);
@@ -827,7 +960,7 @@
             : null,
           `Shoulder Stability: ${shoulderStability.toFixed(2)} variance`,
           `Head Stability: ${headStability.toFixed(2)} variance`,
-          `Micro-Stress Level: ${avgStress.toFixed(1)}%`,
+          `Facial Tension Index: ${avgStress.toFixed(1)}%`,
           `Facial Emotion: ${dominantEmotion}`
         ].filter(Boolean).join(', ');
 

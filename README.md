@@ -483,8 +483,7 @@ Push to `main` — Vercel auto-deploys every commit. No build step required.
 | **Single person** | The pipeline is calibrated for one person in the frame. Multiple people will produce unpredictable results. |
 | **Lighting sensitivity** | MediaPipe models degrade in poor lighting, strong backlighting, or extreme colour temperatures. |
 | **Profile vs. frontal switch** | The code switches metric modes based on shoulder width. Intermediate angles (45°) produce neither clean profile nor frontal readings. |
-| **Simulated blinks** | Eye blink count and blinks-per-second are mock data. They are visual indicators only and must not be used for clinical interpretation. |
-| **Stress is a proxy** | Micro-Stress Level is a facial micro-tension index, not a physiological stress measurement. It should be read as a supporting signal, not a primary clinical output. |
+| **Facial Tension Index is a proxy** | Facial Tension Index is a baseline-relative facial micro-tension score (0–100%), normalised against the user's own resting variance captured during the 3-second stability window. It is not a physiological stress measurement and should be read as a supporting signal, not a primary clinical output. The baseline resets on every page reload; the first "Analyse Posture" click after a reload uses legacy fixed-constant fallback values until calibration completes. |
 | **Model cold start** | On first load, WASM binary compilation takes 3–8 seconds before tracking begins. Subsequent frames are fast. |
 | **No persistent storage** | All data exists in memory only. Refreshing the page resets everything. The CSV export is the only persistence mechanism. |
 | **Mobile support** | Functional on modern mobile browsers but tracking accuracy is lower due to camera angle, resolution constraints, and CPU throttling. |
