@@ -245,16 +245,6 @@
   @keyframes spin{to{transform:rotate(360deg);}}
   .ai-loading p{font-family:var(--mono); font-size:12px; color:var(--ink-soft); letter-spacing:.04em;}
 
-  /* ---------- TESTIMONIALS ---------- */
-  .testimonials{background:var(--sage-pale);}
-  .quote-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line);}
-  @media(max-width:860px){.quote-grid{grid-template-columns:1fr;}}
-  .quote-card{background:var(--surface); padding:36px 30px;}
-  .quote-mark{font-family:var(--display); font-style:italic; font-size:48px; color:var(--sage-light); line-height:1; margin-bottom:8px;}
-  .quote-card p{font-size:15px; line-height:1.6; color:var(--ink); margin-bottom:22px;}
-  .quote-who strong{color:var(--ink); font-weight:600; font-family:var(--body); font-size:13.5px; display:block; margin-bottom:2px;}
-  .quote-who span{font-family:var(--mono); font-size:11px; letter-spacing:.03em; color:var(--ink-soft);}
-
   /* ---------- FEEDBACK ---------- */
   .feedback-wrap{display:grid; grid-template-columns:.85fr 1.15fr; gap:56px; align-items:start;}
   @media(max-width:860px){.feedback-wrap{grid-template-columns:1fr;}}
@@ -587,30 +577,13 @@
 
   async function pingActivity(session) {
     if (!session || !session.user) return;
-    const today = new Date().toISOString().slice(0, 10);
     const user = session.user;
-    const client = window.supabaseClient || supabase;
 
-    // 1. Direct Supabase ping if client available
-    if (client) {
-      try {
-        await client
-          .from('user_activity')
-          .upsert({ user_id: user.id, activity_date: today }, { onConflict: 'user_id,activity_date' });
-      } catch (e) {}
-    }
-
-    // 2. Server-side API ping (records activity + synchronizes profile + verifies weekly status)
+    // The server verifies the session token before it records any activity.
     try {
       const res = await fetch('/api/activity', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: user.id,
-          email: user.email || '',
-          full_name: user.user_metadata?.full_name || '',
-          avatar_url: user.user_metadata?.avatar_url || ''
-        })
+        headers: { Authorization: `Bearer ${session.access_token}` }
       });
       if (res.ok) {
         const data = await res.json();
@@ -629,7 +602,7 @@
       console.warn('[Activity sync note]', err);
     }
 
-    // 3. Refresh live platform stats with user context
+    // Refresh live platform stats with user context
     if (typeof window.fetchPlatformStats === 'function') {
       window.fetchPlatformStats(user.id);
     }
@@ -697,7 +670,7 @@
     <div class="stat-item reveal"><span class="num">8/10</span><span class="cap">Desk workers experience spinal strain</span></div>
     <div class="stat-item reveal"><span class="num">+10 lbs</span><span class="cap">Spinal load per inch of forward tilt</span></div>
     <div class="stat-item reveal"><span class="num">&lt;60s</span><span class="cap">Camera on to full clinical report</span></div>
-    <div class="stat-item reveal"><span class="num">100%</span><span class="cap">On-device privacy. Zero frames uploaded.</span></div>
+    <div class="stat-item reveal"><span class="num">0</span><span class="cap">Video frames uploaded. Only your measurements go to the AI.</span></div>
   </div>
 </div>
 
@@ -732,7 +705,7 @@
       <p>Every reading happens in sequence, on-device — the same order every time, so the model always compares like against like.</p>
     </div>
     <div class="steps">
-      <div class="step reveal"><div class="num">01</div><h3>Face your camera</h3><p>Pose landmarks track your body alignment in real time, fully on-device via Web Worker.</p></div>
+      <div class="step reveal"><div class="num">01</div><h3>Face your camera</h3><p>Pose landmarks track your body alignment in real time, on-device in your browser.</p></div>
       <div class="step reveal"><div class="num">02</div><h3>Hold for 3 seconds</h3><p>A stability snapshot captures shoulder tilt, neck angle, and spinal drift.</p></div>
       <div class="step reveal"><div class="num">03</div><h3>Metrics are extracted</h3><p>Pose signals produce five biomechanical readings, updated live.</p></div>
       <div class="step reveal"><div class="num">04</div><h3>Get a clinical read</h3><p>A clinician-style AI model turns your numbers into a severity rating and fixes.</p></div>
@@ -904,33 +877,6 @@
   </div>
 </section>
 
-<section class="testimonials" id="testimonials">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <div class="eyebrow">From early testers</div>
-      <h2>What people are noticing.</h2>
-      <p>Placeholder quotes for this preview — swap in real feedback once your first testers weigh in.</p>
-    </div>
-    <div class="quote-grid">
-      <div class="quote-card reveal">
-        <div class="quote-mark">"</div>
-        <p>I didn't realize how far forward my neck was until I saw the angle on screen. Fixed my monitor height that same day.</p>
-        <div class="quote-who"><strong>Rani A.</strong><span>Computer science student</span></div>
-      </div>
-      <div class="quote-card reveal">
-        <div class="quote-mark">"</div>
-        <p>Ran it during a staff wellness week — no camera awkwardness, no waiting room. Just open the page and go.</p>
-        <div class="quote-who"><strong>Dimas P.</strong><span>School health coordinator</span></div>
-      </div>
-      <div class="quote-card reveal">
-        <div class="quote-mark">"</div>
-        <p>The report reads like an actual physio wrote it, not a generic "sit up straight" reminder.</p>
-        <div class="quote-who"><strong>Farah N.</strong><span>Office worker</span></div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <section id="feedback">
   <div class="wrap">
     <div class="feedback-wrap">
@@ -976,7 +922,7 @@
 
       <div style="text-align:center; background:var(--sage-pale); border:1px solid var(--sage-light); border-radius:4px; padding:32px 24px;">
         <h3 style="font-family:var(--display); font-size:22px; margin-bottom:8px; color:var(--ink);">Want to measure your own posture?</h3>
-        <p style="color:var(--ink-soft); font-size:14.5px; max-width:480px; margin:0 auto 20px;">Use your webcam to track forward head tilt, shoulder symmetry, and stability in 60 seconds. 100% private, on-device screening.</p>
+        <p style="color:var(--ink-soft); font-size:14.5px; max-width:480px; margin:0 auto 20px;">Use your webcam to track forward head tilt, shoulder symmetry, and stability in 60 seconds. Your video stays on your device.</p>
         <a href="#scan" id="scanYourOwnBtn" class="btn btn-primary" style="padding:14px 28px;">Scan your own posture →</a>
       </div>
     </div>
@@ -2894,7 +2840,7 @@ fetchPlatformStats();
 async function handleSharedRoute() {
   const hash = (typeof window !== 'undefined' && window.location && window.location.hash) ? window.location.hash : '';
   const sharedView = document.getElementById('sharedResultView');
-  const mainElements = document.querySelectorAll('header.hero, .stats, #how, #metrics, #scan, #progress, #testimonials, #feedback');
+  const mainElements = document.querySelectorAll('header.hero, .stats, #how, #metrics, #scan, #progress, #feedback');
 
   if (hash.startsWith('#/r/')) {
     const id = hash.slice(5).split('?')[0].trim();

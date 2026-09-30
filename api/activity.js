@@ -33,18 +33,26 @@ export default async function handler(req, res) {
 
   // ── POST: Record User Activity On Sign-in / Session Ping ────────────────────
   if (req.method === 'POST') {
-    const { user_id, email, full_name, avatar_url } = req.body || {};
-
-    if (!user_id || typeof user_id !== 'string') {
-      return res.status(400).json({ error: 'Missing or invalid user_id' });
+    // The caller proves who they are with their Supabase session token.
+    // A user_id in the request body is never trusted.
+    const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+    if (!token) {
+      return res.status(401).json({ error: 'Missing bearer token' });
     }
 
     try {
+      const { data: authData, error: authError } = await supabase.auth.getUser(token);
+      const user = authData?.user;
+      if (authError || !user) {
+        return res.status(401).json({ error: 'Invalid or expired session' });
+      }
+      const userId = user.id;
+
       // 1. Record daily activity entry in user_activity table
       const { error: activityError } = await supabase
         .from('user_activity')
         .upsert(
-          { user_id: user_id.trim(), activity_date: todayStr },
+          { user_id: userId, activity_date: todayStr },
           { onConflict: 'user_id,activity_date' }
         );
 
@@ -56,7 +64,7 @@ export default async function handler(req, res) {
       const { data: userRecords, error: queryError } = await supabase
         .from('user_activity')
         .select('activity_date')
-        .eq('user_id', user_id.trim())
+        .eq('user_id', userId)
         .gte('activity_date', sevenDaysAgo)
         .lte('activity_date', todayStr);
 
@@ -65,8 +73,8 @@ export default async function handler(req, res) {
 
       return res.status(200).json({
         ok: true,
-        user_id: user_id.trim(),
-        email: email || '',
+        user_id: userId,
+        email: user.email || '',
         activity_date: todayStr,
         weeklyActive: isWeeklyActive,
         daysActiveLast7Days,

@@ -72,7 +72,6 @@ vercel.json                     build command (vite build) and output folder (di
 public/                         favicon, hero and logo images
 mediaspine logo/                logo and icon assets
 smoke-test.js                   checks index.html, evaluate.js, dist/ and stats.js
-worker.js                       unused, left over from an earlier version
 mediaspine_hero.jpg             not referenced by index.html
 MEDIASPINE_FIXLOG.md            log of the earlier fix passes
 AGENTS.md                       instructions for coding agents
@@ -86,7 +85,7 @@ The browser loads MediaPipe Pose 0.5.1675469404 and canvas-confetti 1.9.4 from j
 | Route | Method | What it does |
 |---|---|---|
 | `/api/evaluate` | POST | Body `{ "payload": "<metrics string>" }`. Calls Groq model `openai/gpt-oss-120b` with temperature 0.2 and JSON output, and returns the raw Groq response. |
-| `/api/activity` | POST, GET | POST takes `{ user_id, email, full_name, avatar_url }` (only `user_id` is required), records today's activity and returns `weeklyActive` and `daysActiveLast7Days`. GET with `?user_id=` returns the activity status for that user. |
+| `/api/activity` | POST, GET | POST needs the header `Authorization: Bearer <Supabase access token>`. The function takes the user from the verified token, ignores any id in the body, records today's activity and returns `weeklyActive` and `daysActiveLast7Days`. It returns 401 for a missing or invalid token. GET with `?user_id=` returns the activity status for that user. |
 | `/api/stats` | GET | Returns `totalUsers`, `activeWeekly` and `activeToday` from the `user_activity` table. |
 | `/api/feedback` | POST | Body `{ name, email, message, score }`. Only `message` is required. Sends an email through Gmail SMTP. |
 
@@ -125,7 +124,7 @@ The repo does not contain migrations, so the schema lives only in the Supabase p
 | `user_activity` | `user_id`, `activity_date`. The upsert conflicts on `(user_id, activity_date)`, so that pair needs a unique constraint. |
 | `shared_results` | `id`, `score`, `severity`, `metrics`, `summary`, `variant`, `trend`, `milestone` |
 
-The browser reads and writes these tables with the publishable key, so Row Level Security policies decide who can see what. Those policies are also part of the Supabase project and not this repo.
+The browser reads and writes `scans` and `shared_results` with the publishable key, so Row Level Security policies decide who can see what. Only `/api/activity` writes `user_activity`, using the service role key, so that table needs no policy that lets the browser insert. The policies are part of the Supabase project and not this repo.
 
 ### Google Cloud
 
@@ -133,11 +132,13 @@ Create an OAuth client and paste its client ID and secret into the Supabase Goog
 
 ## Run locally
 
+Use Node 22 or newer. The Vercel project runs Node 24, and `@supabase/supabase-js` needs a native `WebSocket`, so the `/api` handlers that talk to Supabase fail to start on Node 20.
+
 ```bash
 npm install
 ```
 
-Create `.env.local` with `GROQ_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY`, then:
+Create `.env.local` with the variables from the table above (`GROQ_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` at minimum, plus `SMTP_PASS` to test the feedback form), then:
 
 ```bash
 npm run dev
@@ -145,7 +146,7 @@ npm run dev
 
 The site is served at http://localhost:5173. Browsers allow camera access on `localhost` and on HTTPS pages only.
 
-The dev server in `vite.config.js` serves `/api/evaluate` and `/api/stats`. It routes `/api/activity` to the stats handler, and it does not serve `/api/feedback`.
+The dev server in `vite.config.js` serves the four routes in `api/` from the same handlers Vercel runs.
 
 ### Checks
 
@@ -179,7 +180,6 @@ For a signed-in user, the site also stores each scan's metrics and AI result in 
 - A view near 45 degrees is neither a clean profile nor a clean frontal view.
 - The browser limit of 5 evaluations a day resets when the user clears site data.
 - The AI text is generated from five numbers. The model never sees the person.
-- `/api/activity` trusts the `user_id` in the request body and does not check the caller's session, so the user counts on the landing page are not tamper-proof.
 - MediaPipe files load from jsDelivr on first use, so the scanner needs network access and takes a few seconds to start.
 
 ## Disclaimer

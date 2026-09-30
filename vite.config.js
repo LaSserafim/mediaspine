@@ -1,9 +1,21 @@
 import { defineConfig, loadEnv } from 'vite';
 import evaluateHandler from './api/evaluate.js';
 import statsHandler from './api/stats.js';
+import activityHandler from './api/activity.js';
+import feedbackHandler from './api/feedback.js';
+
+const routes = {
+  '/api/evaluate': evaluateHandler,
+  '/api/stats': statsHandler,
+  '/api/activity': activityHandler,
+  '/api/feedback': feedbackHandler
+};
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
+  // The handlers read process.env, as they do on Vercel, so copy .env.local into it.
+  for (const [key, value] of Object.entries(loadEnv(mode, process.cwd(), ''))) {
+    if (process.env[key] === undefined) process.env[key] = value;
+  }
 
   return {
     server: {
@@ -13,47 +25,34 @@ export default defineConfig(({ mode }) => {
       {
         name: 'vercel-api-dev-server',
         configureServer(server) {
-          // Helper to mock Vercel serverless response helpers
-          const attachHelpers = (res) => {
-            res.status = (statusCode) => {
-              res.statusCode = statusCode;
-              return res;
-            };
-            res.json = (jsonData) => {
-              res.setHeader('Content-Type', 'application/json');
-              res.end(JSON.stringify(jsonData));
-              return res;
-            };
-          };
+          for (const [path, handler] of Object.entries(routes)) {
+            server.middlewares.use(path, async (req, res) => {
+              // Mimic the helpers Vercel adds to req and res.
+              res.status = (statusCode) => {
+                res.statusCode = statusCode;
+                return res;
+              };
+              res.json = (jsonData) => {
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify(jsonData));
+                return res;
+              };
+              req.query = Object.fromEntries(new URL(req.url, 'http://localhost').searchParams);
 
-          // /api/evaluate middleware
-          server.middlewares.use('/api/evaluate', async (req, res) => {
-            if (req.method !== 'POST') {
-              res.statusCode = 405;
-              res.setHeader('Content-Type', 'application/json');
-              res.end(JSON.stringify({ error: 'Method not allowed' }));
-              return;
-            }
-
-            let body = '';
-            req.on('data', chunk => { body += chunk; });
-            req.on('end', async () => {
+              let body = '';
+              if (req.method !== 'GET' && req.method !== 'HEAD') {
+                for await (const chunk of req) body += chunk;
+              }
               try {
                 req.body = JSON.parse(body || '{}');
               } catch (e) {
                 req.body = {};
               }
 
-              attachHelpers(res);
-
-              if (!process.env.GROQ_API_KEY && env.GROQ_API_KEY) {
-                process.env.GROQ_API_KEY = env.GROQ_API_KEY;
-              }
-
               try {
-                await evaluateHandler(req, res);
+                await handler(req, res);
               } catch (err) {
-                console.error('[API evaluate dev error]', err);
+                console.error(`[API ${path} dev error]`, err);
                 if (!res.writableEnded) {
                   res.statusCode = 500;
                   res.setHeader('Content-Type', 'application/json');
@@ -61,28 +60,7 @@ export default defineConfig(({ mode }) => {
                 }
               }
             });
-          });
-
-          // /api/stats and /api/activity middleware
-          const handleStats = async (req, res) => {
-            attachHelpers(res);
-            if (!process.env.SUPABASE_SERVICE_ROLE_KEY && env.SUPABASE_SERVICE_ROLE_KEY) {
-              process.env.SUPABASE_SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY;
-            }
-            try {
-              await statsHandler(req, res);
-            } catch (err) {
-              console.error('[API stats dev error]', err);
-              if (!res.writableEnded) {
-                res.statusCode = 500;
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ error: err.message }));
-              }
-            }
-          };
-
-          server.middlewares.use('/api/stats', handleStats);
-          server.middlewares.use('/api/activity', handleStats);
+          }
         }
       }
     ]
