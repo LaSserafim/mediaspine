@@ -2,10 +2,35 @@
 // The GROQ_API_KEY environment variable is set in the Vercel dashboard.
 // It is never sent to the browser.
 
+// In-memory rate limit store: IP -> { count, resetTime }
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
+const MAX_REQUESTS_PER_WINDOW = 20;
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Basic per-IP rate limit backstop
+  const forwarded = req.headers['x-forwarded-for'];
+  const ip = (typeof forwarded === 'string' ? forwarded.split(',')[0] : req.socket?.remoteAddress) || 'unknown';
+  const now = Date.now();
+  const clientData = rateLimitMap.get(ip) || { count: 0, resetTime: now + RATE_LIMIT_WINDOW_MS };
+
+  if (now > clientData.resetTime) {
+    clientData.count = 0;
+    clientData.resetTime = now + RATE_LIMIT_WINDOW_MS;
+  }
+
+  if (clientData.count >= MAX_REQUESTS_PER_WINDOW) {
+    return res.status(429).json({
+      error: 'Daily evaluation limit reached for this IP. Please try again tomorrow.'
+    });
+  }
+
+  clientData.count++;
+  rateLimitMap.set(ip, clientData);
 
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
@@ -35,10 +60,8 @@ You will receive numerical metrics such as:
 - Neck Deviation Angle (degrees)
 - Shoulder Tilt (degrees)
 - Head Tilt (degrees)
-- Shoulder Stability
-- Head Stability
-- Facial Tension Index (%)
-- Detected Emotion
+- Shoulder Stability (variance over 3-second snapshot)
+- Head Stability (variance over 3-second snapshot)
 
 Always use every measurement available. Never ignore a metric.
 
@@ -59,7 +82,7 @@ Exactly this schema:
 SUMMARY
 --------------------------------------------------
 Maximum 80 words.
-Summarise the posture in natural language. Mention: overall posture quality, largest biomechanical concern, stress observation, overall severity.
+Summarise the posture in natural language. Mention: overall posture quality, largest biomechanical concern, overall severity.
 This should sound like a clinician speaking directly to the user.
 
 --------------------------------------------------
@@ -77,16 +100,14 @@ Never write vague statements. Explain WHY.
 Discuss: load distribution, muscle imbalance, joint mechanics, movement symmetry, head position, shoulder mechanics, stability, muscle compensation.
 Do NOT diagnose diseases. Say things like "this pattern is commonly associated with..." or "this posture may increase loading on..."
 Always connect explanation to measured values.
-If stress is elevated, explain how facial tension and posture may interact.
 If stability is poor, explain what instability indicates.
-If emotion is tense/sad, integrate it naturally. Do not overstate psychological conclusions.
 
 --------------------------------------------------
 FUTURE RISKS
 --------------------------------------------------
 Predict realistic progression ONLY if these measurements become habitual.
 Write naturally as paragraphs covering short-term, medium-term, and long-term outlook.
-Acceptable outcomes: cervical muscle fatigue, upper trapezius overload, levator scapulae tightness, reduced thoracic mobility, tension headaches, reduced shoulder efficiency, postural endurance decline, neck stiffness.
+Acceptable outcomes: cervical muscle fatigue, upper trapezius overload, levator scapulae tightness, reduced thoracic mobility, cervicogenic headaches, reduced shoulder efficiency, postural endurance decline, neck stiffness.
 Do NOT mention: stroke, paralysis, disc herniation, arthritis, degenerative disease unless measurements are extremely abnormal.
 Avoid fear-based language. Never exaggerate.
 
@@ -105,7 +126,6 @@ BIOMECHANICAL INTERPRETATION
 Neck Deviation: 0-5 degrees Normal | 5-10 degrees Very Mild | 10-15 degrees Mild | 15-20 degrees Moderate | 20+ degrees Severe
 Shoulder Tilt: 0-2 degrees Normal | 2-4 degrees Mild | 4-7 degrees Moderate | 7+ degrees High
 Head Tilt: 0-2 degrees Normal | 2-4 degrees Mild | 4-7 degrees Moderate | 7+ degrees Severe
-Facial Tension Index: 0-20% Very Low | 20-40% Low | 40-60% Moderate | 60-80% High | 80-100% Very High
 Stability: Lower variance = better postural control. Higher variance = reduced endurance or inconsistent muscular control.
 
 --------------------------------------------------
@@ -132,7 +152,7 @@ Avoid template responses. Every sentence should be directly justified by the num
       'Content-Type':  'application/json'
     },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user',   content: `Here is the raw numerical data: ${payload}.` }

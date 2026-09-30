@@ -1,0 +1,23 @@
+<svg width="180" height="150" viewBox="0 0 180 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ms-stacked-grad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4A6B5A"/>
+      <stop offset="100%" stop-color="#375043"/>
+    </linearGradient>
+  </defs>
+  <!-- Icon Badge -->
+  <g transform="translate(58, 12)">
+    <rect width="64" height="64" rx="14" fill="#E7ECE4"/>
+    <rect width="64" height="64" rx="14" stroke="#4A6B5A" stroke-width="1.5" stroke-opacity="0.2"/>
+    <g transform="translate(8, 8) scale(1.0)" fill="url(#ms-stacked-grad)">
+      
+    </g>
+  </g>
+  <!-- Typography -->
+  <text x="90" y="108" text-anchor="middle" font-family="'Fraunces', Georgia, serif" font-size="24" font-weight="500" font-style="italic" letter-spacing="-0.02em">
+    <tspan fill="#1C1D1B">media</tspan><tspan fill="#4A6B5A">spine</tspan>
+  </text>
+  <text x="90" y="128" text-anchor="middle" font-family="'Inter', -apple-system, sans-serif" font-size="8.5" font-weight="600" letter-spacing="0.15em" fill="#6B6A64" text-transform="uppercase">
+    Posture, Measured
+  </text>
+</svg>

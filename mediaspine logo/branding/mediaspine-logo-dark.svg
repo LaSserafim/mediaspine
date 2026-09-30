@@ -1,0 +1,25 @@
+<svg width="280" height="56" viewBox="0 0 280 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ms-dark-grad" x1="4" y1="4" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8FA89A"/>
+      <stop offset="100%" stop-color="#E7ECE4"/>
+    </linearGradient>
+  </defs>
+  <!-- Icon Badge -->
+  <g transform="translate(4, 4)">
+    <rect width="48" height="48" rx="10" fill="#2A3630"/>
+    <rect width="48" height="48" rx="10" stroke="#4A6B5A" stroke-width="1.5" stroke-opacity="0.6"/>
+    <g transform="translate(4, 4) scale(0.8333)" fill="url(#ms-dark-grad)">
+      
+    </g>
+  </g>
+  <!-- Typography -->
+  <g transform="translate(64, 37)">
+    <text font-family="'Fraunces', Georgia, serif" font-size="26" font-weight="500" font-style="italic" letter-spacing="-0.02em">
+      <tspan fill="#FFFFFF">media</tspan><tspan fill="#8FA89A">spine</tspan>
+    </text>
+    <text x="1" y="11" font-family="'Inter', -apple-system, sans-serif" font-size="9" font-weight="600" letter-spacing="0.14em" fill="#A4A29B" text-transform="uppercase">
+      Clinical Posture AI
+    </text>
+  </g>
+</svg>

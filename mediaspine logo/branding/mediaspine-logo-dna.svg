@@ -1,0 +1,30 @@
+<svg width="280" height="56" viewBox="0 0 280 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="dna-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4A6B5A"/>
+      <stop offset="50%" stop-color="#8FA89A"/>
+      <stop offset="100%" stop-color="#B8935F"/>
+    </linearGradient>
+  </defs>
+  <!-- Biometric Spine + DNA Emblem -->
+  <g transform="translate(4, 4)">
+    <rect width="48" height="48" rx="10" fill="#E7ECE4"/>
+    <!-- Subtle Biometric Grid Dots -->
+    <circle cx="10" cy="10" r="1" fill="#4A6B5A" opacity="0.4"/>
+    <circle cx="38" cy="10" r="1" fill="#4A6B5A" opacity="0.4"/>
+    <circle cx="10" cy="38" r="1" fill="#4A6B5A" opacity="0.4"/>
+    <circle cx="38" cy="38" r="1" fill="#4A6B5A" opacity="0.4"/>
+    <!-- Spine Element -->
+    <g transform="translate(4, 4) scale(0.8333)" fill="url(#dna-grad)">
+      
+    </g>
+  </g>
+  <g transform="translate(64, 37)">
+    <text font-family="'Fraunces', Georgia, serif" font-size="26" font-weight="500" font-style="italic" letter-spacing="-0.02em">
+      <tspan fill="#1C1D1B">media</tspan><tspan fill="#4A6B5A">spine</tspan>
+    </text>
+    <text x="1" y="11" font-family="'IBM Plex Mono', monospace" font-size="8.5" font-weight="500" letter-spacing="0.12em" fill="#4A6B5A" text-transform="uppercase">
+      [AI-BIOMETRIC-SCREENING]
+    </text>
+  </g>
+</svg>

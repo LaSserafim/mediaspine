@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediaSpine — Brand Logo & Health Icons Asset Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,480;0,9..144,560;1,9..144,420&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="branding/mediaspine-favicon.svg">
+<style>
+  :root {
+    --bg: #F6F4EE;
+    --surface: #FFFFFF;
+    --surface-soft: #F0EDE5;
+    --ink: #1C1D1B;
+    --ink-soft: #6B6A64;
+    --sage: #4A6B5A;
+    --sage-light: #8FA89A;
+    --sage-pale: #E7ECE4;
+    --amber: #B8935F;
+    --line: #E1DED4;
+    --display: 'Fraunces', Georgia, serif;
+    --body: 'Inter', -apple-system, sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+    --shadow: 0 4px 20px -2px rgba(28, 29, 27, 0.05);
+  }
+
+  body.dark-mode {
+    --bg: #141615;
+    --surface: #1E2220;
+    --surface-soft: #252A27;
+    --ink: #F6F4EE;
+    --ink-soft: #A4A29B;
+    --sage: #8FA89A;
+    --sage-light: #B4C6BC;
+    --sage-pale: #2A3630;
+    --line: #2F3632;
+    --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    line-height: 1.5;
+    padding-bottom: 80px;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .wrap { max-width: 1140px; margin: 0 auto; padding: 0 28px; }
+
+  header {
+    border-bottom: 1px solid var(--line);
+    padding: 36px 0 28px;
+    background: var(--surface);
+    margin-bottom: 40px;
+  }
+
+  .header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .brand-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .brand-title h1 {
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+  }
+
+  .brand-title h1 span { color: var(--sage); font-style: italic; }
+  
+  .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: var(--sage-pale);
+    color: var(--sage);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  .theme-toggle {
+    background: var(--surface-soft);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .theme-toggle:hover {
+    border-color: var(--sage);
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-size: 22px;
+    font-weight: 480;
+    margin: 40px 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  h2::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: var(--sage-light);
+  }
+
+  .card-preview {
+    min-height: 140px;
+    padding: 28px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-soft);
+    position: relative;
+  }
+  .card-preview.dark-preview {
+    background: #181C1A;
+  }
+  .card-preview.sage-preview {
+    background: #4A6B5A;
+  }
+
+  .card-info {
+    padding: 16px 20px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .card-title {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .card-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .btn {
+    padding: 7px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+  .btn:hover {
+    border-color: var(--sage);
+    color: var(--sage);
+  }
+  .btn-primary {
+    background: var(--sage);
+    color: #FFFFFF;
+    border-color: var(--sage);
+  }
+  .btn-primary:hover {
+    background: #3d584a;
+    color: #FFFFFF;
+  }
+
+  .icon-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .icon-card:hover {
+    border-color: var(--sage);
+    transform: translateY(-2px);
+  }
+  .icon-card img {
+    width: 36px;
+    height: 36px;
+    transition: transform 0.2s;
+  }
+  .icon-card:hover img {
+    transform: scale(1.15);
+  }
+  .icon-name {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    word-break: break-all;
+  }
+
+  /* Color Palette Tokens */
+  .palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .color-swatch {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .color-box {
+    height: 56px;
+  }
+  .color-details {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .color-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+  .color-hex { font-family: var(--mono); color: var(--ink-soft); font-size: 11px; }
+
+  /* Toast Notification */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 100;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap header-flex">
+    <div class="brand-title">
+      <img src="branding/mediaspine-icon-sage.svg" width="36" height="36" alt="Spine Icon">
+      <div>
+        <h1>media<span>spine</span></h1>
+        <div style="font-size:12px; color:var(--ink-soft); margin-top:2px;">Asset Hub & Health Icons Collection</div>
+      </div>
+      <span class="badge">HealthIcons MIT</span>
+    </div>
+    <div>
+      <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">🌓 Toggle Dark View</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- BRAND PALETTE -->
+  <h2>Brand Colors</h2>
+  <div class="palette-grid">
+    <div class="color-swatch">
+      <div class="color-box" style="background:#4A6B5A;"></div>
+      <div class="color-details">
+        <div class="color-name">Sage Primary</div>
+        <div class="color-hex">#4A6B5A</div>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="color-box" style="background:#8FA89A;"></div>
+      <div class="color-details">
+        <div class="color-name">Sage Light</div>
+        <div class="color-hex">#8FA89A</div>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="color-box" style="background:#E7ECE4;"></div>
+      <div class="color-details">
+        <div class="color-name">Sage Pale</div>
+        <div class="color-hex">#E7ECE4</div>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="color-box" style="background:#1C1D1B;"></div>
+      <div class="color-details">
+        <div class="color-name">Ink Deep</div>
+        <div class="color-hex">#1C1D1B</div>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="color-box" style="background:#B8935F;"></div>
+      <div class="color-details">
+        <div class="color-name">Amber Accent</div>
+        <div class="color-hex">#B8935F</div>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="color-box" style="background:#F6F4EE;"></div>
+      <div class="color-details">
+        <div class="color-name">Canvas BG</div>
+        <div class="color-hex">#F6F4EE</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BRAND LOCKUPS -->
+  <h2>MediaSpine Brand Lockups</h2>
+  <div class="grid">
+    
+    <!-- Primary Lockup -->
+    <div class="card">
+      <div class="card-preview">
+        <img src="branding/mediaspine-logo-primary.svg" alt="Primary Logo" style="max-height: 48px;">
+      </div>
+      <div class="card-info">
+        <div class="card-title">Primary Lockup (Horizontal)</div>
+        <div class="card-meta">branding/mediaspine-logo-primary.svg</div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="branding/mediaspine-logo-primary.svg" download>Download</a>
+          <button class="btn" onclick="copyPath('branding/mediaspine-logo-primary.svg')">Copy Path</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dark Lockup -->
+    <div class="card">
+      <div class="card-preview dark-preview">
+        <img src="branding/mediaspine-logo-dark.svg" alt="Dark Logo" style="max-height: 48px;">
+      </div>
+      <div class="card-info">
+        <div class="card-title">Dark Theme Lockup</div>
+        <div class="card-meta">branding/mediaspine-logo-dark.svg</div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="branding/mediaspine-logo-dark.svg" download>Download</a>
+          <button class="btn" onclick="copyPath('branding/mediaspine-logo-dark.svg')">Copy Path</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DNA Biometric Emblem -->
+    <div class="card">
+      <div class="card-preview">
+        <img src="branding/mediaspine-logo-dna.svg" alt="DNA Biometric Logo" style="max-height: 48px;">
+      </div>
+      <div class="card-info">
+        <div class="card-title">DNA & Biometric AI Lockup</div>
+        <div class="card-meta">branding/mediaspine-logo-dna.svg</div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="branding/mediaspine-logo-dna.svg" download>Download</a>
+          <button class="btn" onclick="copyPath('branding/mediaspine-logo-dna.svg')">Copy Path</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navbar Inline Logo -->
+    <div class="card">
+      <div class="card-preview">
+        <img src="branding/mediaspine-logo-navbar.svg" alt="Navbar Logo" style="max-height: 38px;">
+      </div>
+      <div class="card-info">
+        <div class="card-title">Navbar Inline Lockup</div>
+        <div class="card-meta">branding/mediaspine-logo-navbar.svg</div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="branding/mediaspine-logo-navbar.svg" download>Download</a>
+          <button class="btn" onclick="copyPath('branding/mediaspine-logo-navbar.svg')">Copy Path</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stacked / Vertical Lockup -->
+    <div class="card">
+      <div class="card-preview" style="min-height: 180px;">
+        <img src="branding/mediaspine-logo-stacked.svg" alt="Stacked Logo" style="max-height: 130px;">
+      </div>
+      <div class="card-info">
+        <div class="card-title">Stacked Vertical Lockup</div>
+        <div class="card-meta">branding/mediaspine-logo-stacked.svg</div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="branding/mediaspine-logo-stacked.svg" download>Download</a>
+          <button class="btn" onclick="copyPath('branding/mediaspine-logo-stacked.svg')">Copy Path</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- App Badges -->
+    <div class="card">
+      <div class="card-preview" style="gap:24px;">
+        <img src="branding/mediaspine-logo-badge.svg" alt="App Badge" style="max-height: 72px;">
+        <img src="branding/mediaspine-logo-badge-dark.svg" alt="Dark Badge" style="max-height: 72px;">
+      </div>
+      <div class="card-info">
+        <div class="card-title">App Icon Badges (Light & Dark)</div>
+        <div class="card-meta">branding/mediaspine-logo-badge.svg</div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="branding/mediaspine-logo-badge.svg" download>Download</a>
+          <button class="btn" onclick="copyPath('branding/mediaspine-logo-badge.svg')">Copy Path</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- HEALTHICONS OFFICIAL SPINE ASSETS -->
+  <h2>Official HealthIcons Spine Elements</h2>
+  <div class="grid">
+    
+    <div class="card">
+      <div class="card-preview">
+        <img src="healthicons-spine/spine-filled-48px.svg" alt="Spine Filled 48px" style="width: 48px; height: 48px; color: #4A6B5A;">
+      </div>
+      <div class="card-info">
+        <div class="card-title">Spine — Filled (48px)</div>
+        <div class="card-meta">healthicons-spine/spine-filled-48px.svg</div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="healthicons-spine/spine-filled-48px.svg" download>Download</a>
+          <button class="btn" onclick="copyPath('healthicons-spine/spine-filled-48px.svg')">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-preview">
+        <img src="healthicons-spine/spine-outline-48px.svg" alt="Spine Outline 48px" style="width: 48px; height: 48px; color: #4A6B5A;">
+      </div>
+      <div class="card-info">
+        <div class="card-title">Spine — Outline (48px)</div>
+        <div class="card-meta">healthicons-spine/spine-outline-48px.svg</div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="healthicons-spine/spine-outline-48px.svg" download>Download</a>
+          <button class="btn" onclick="copyPath('healthicons-spine/spine-outline-48px.svg')">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-preview">
+        <img src="healthicons-spine/spine-filled-24px.svg" alt="Spine Filled 24px" style="width: 32px; height: 32px; color: #4A6B5A;">
+      </div>
+      <div class="card-info">
+        <div class="card-title">Spine — Filled (24px)</div>
+        <div class="card-meta">healthicons-spine/spine-filled-24px.svg</div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="healthicons-spine/spine-filled-24px.svg" download>Download</a>
+          <button class="btn" onclick="copyPath('healthicons-spine/spine-filled-24px.svg')">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-preview">
+        <img src="healthicons-spine/spine-outline-24px.svg" alt="Spine Outline 24px" style="width: 32px; height: 32px; color: #4A6B5A;">
+      </div>
+      <div class="card-info">
+        <div class="card-title">Spine — Outline (24px)</div>
+        <div class="card-meta">healthicons-spine/spine-outline-24px.svg</div>
+        <div class="card-actions">
+          <a class="btn btn-primary" href="healthicons-spine/spine-outline-24px.svg" download>Download</a>
+          <button class="btn" onclick="copyPath('healthicons-spine/spine-outline-24px.svg')">Copy</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RELATED CLINICAL & ANATOMICAL ICONS -->
+  <h2>Related Health & Biometric Icons</h2>
+  <div class="icon-grid">
+    <div class="icon-card" onclick="copyPath('healthicons-related/joints-filled.svg')">
+      <img src="healthicons-related/joints-filled.svg" alt="joints">
+      <div class="icon-name">joints</div>
+    </div>
+    <div class="icon-card" onclick="copyPath('healthicons-related/skeleton-filled.svg')">
+      <img src="healthicons-related/skeleton-filled.svg" alt="skeleton">
+      <div class="icon-name">skeleton</div>
+    </div>
+    <div class="icon-card" onclick="copyPath('healthicons-related/body-filled.svg')">
+      <img src="healthicons-related/body-filled.svg" alt="body">
+      <div class="icon-name">body</div>
+    </div>
+    <div class="icon-card" onclick="copyPath('healthicons-related/head-filled.svg')">
+      <img src="healthicons-related/head-filled.svg" alt="head">
+      <div class="icon-name">head</div>
+    </div>
+    <div class="icon-card" onclick="copyPath('healthicons-related/dna-filled.svg')">
+      <img src="healthicons-related/dna-filled.svg" alt="dna">
+      <div class="icon-name">dna</div>
+    </div>
+    <div class="icon-card" onclick="copyPath('healthicons-related/orthopaedics-filled.svg')">
+      <img src="healthicons-related/orthopaedics-filled.svg" alt="orthopaedics">
+      <div class="icon-name">orthopaedics</div>
+    </div>
+    <div class="icon-card" onclick="copyPath('healthicons-related/microscope-filled.svg')">
+      <img src="healthicons-related/microscope-filled.svg" alt="microscope">
+      <div class="icon-name">microscope</div>
+    </div>
+    <div class="icon-card" onclick="copyPath('healthicons-related/scanner-ultrasound-filled.svg')">
+      <img src="healthicons-related/scanner-ultrasound-filled.svg" alt="ultrasound">
+      <div class="icon-name">scanner</div>
+    </div>
+    <div class="icon-card" onclick="copyPath('healthicons-related/walking-filled.svg')">
+      <img src="healthicons-related/walking-filled.svg" alt="walking">
+      <div class="icon-name">walking</div>
+    </div>
+    <div class="icon-card" onclick="copyPath('healthicons-related/running-filled.svg')">
+      <img src="healthicons-related/running-filled.svg" alt="running">
+      <div class="icon-name">running</div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast">Copied to clipboard!</div>
+
+<script>
+  function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+  }
+
+  function copyPath(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('Copied: ' + text);
+    });
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="badge-dark-bg" x1="0" y1="0" x2="96" y2="96" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1C1D1B"/>
+      <stop offset="100%" stop-color="#121312"/>
+    </linearGradient>
+    <radialGradient id="badge-inner-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4A6B5A" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#4A6B5A" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="48" cy="48" r="44" fill="url(#badge-dark-bg)"/>
+  <circle cx="48" cy="48" r="44" fill="url(#badge-inner-glow)"/>
+  <circle cx="48" cy="48" r="43.25" stroke="#4A6B5A" stroke-width="1.5"/>
+  <g transform="translate(24, 24) scale(1.0)" fill="#8FA89A">
+    
+  </g>
+</svg>
