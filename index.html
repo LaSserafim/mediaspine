@@ -2231,6 +2231,10 @@ let shoulderYData = [];
 let noseXData     = [];
 let noseYData     = [];
 
+const rollingShoulderY = [];
+const rollingNoseX     = [];
+const rollingNoseY     = [];
+const ROLLING_WINDOW   = 30;
 /* ═══════════════════════════════════════════════════════════════════
    DAILY EVALUATION QUOTA
 ═══════════════════════════════════════════════════════════════════ */
@@ -2382,12 +2386,52 @@ function updateUI(metrics) {
       setText(mHead, '- (Profile)');
       mHead.className = 'val';
     }
+
+    // Live Rolling Stability Tracking
+    if (lm[11] && lm[12]) {
+      rollingShoulderY.push((lm[11].y + lm[12].y) / 2);
+      if (rollingShoulderY.length > ROLLING_WINDOW) rollingShoulderY.shift();
+    }
+    if (lm[0]) {
+      rollingNoseX.push(lm[0].x);
+      rollingNoseY.push(lm[0].y);
+      if (rollingNoseX.length > ROLLING_WINDOW) rollingNoseX.shift();
+      if (rollingNoseY.length > ROLLING_WINDOW) rollingNoseY.shift();
+    }
+
+    if (!isRecording) {
+      if (rollingShoulderY.length >= 6) {
+        const sMax = Math.max(...rollingShoulderY);
+        const sMin = Math.min(...rollingShoulderY);
+        const liveShoulderStab = (sMax - sMin) * 100;
+        setText(mShoulderStab, `${(liveShoulderStab / 100).toFixed(2)} var`);
+        mShoulderStab.className = 'val ' + (liveShoulderStab < 2.0 ? 'good' : liveShoulderStab < 4.5 ? 'caution' : 'bad');
+      } else {
+        setText(mShoulderStab, 'Calibrating...');
+        mShoulderStab.className = 'val';
+      }
+
+      if (rollingNoseX.length >= 6) {
+        const nxMax = Math.max(...rollingNoseX), nxMin = Math.min(...rollingNoseX);
+        const nyMax = Math.max(...rollingNoseY), nyMin = Math.min(...rollingNoseY);
+        const liveHeadStab = Math.max(nxMax - nxMin, nyMax - nyMin) * 100;
+        setText(mHeadStab, `${(liveHeadStab / 100).toFixed(2)} var`);
+        mHeadStab.className = 'val ' + (liveHeadStab < 2.0 ? 'good' : liveHeadStab < 4.5 ? 'caution' : 'bad');
+      } else {
+        setText(mHeadStab, 'Calibrating...');
+        mHeadStab.className = 'val';
+      }
+    }
   } else {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (snapshotBtn) snapshotBtn.disabled = true;
     setText(mNeck, '-');
     setText(mShoulder, '-');
     setText(mHead, '-');
+    setText(mShoulderStab, '-');
+    setText(mHeadStab, '-');
+    mShoulderStab.className = 'val';
+    mHeadStab.className = 'val';
   }
 }
 
@@ -2439,6 +2483,14 @@ function stopCamera() {
   if (camStatus) camStatus.textContent = 'CAMERA OFF';
   if (camPlaceholder) camPlaceholder.style.display = 'flex';
   if (snapshotBtn) snapshotBtn.disabled = true;
+
+  rollingShoulderY.length = 0;
+  rollingNoseX.length = 0;
+  rollingNoseY.length = 0;
+  setText(mShoulderStab, '-');
+  setText(mHeadStab, '-');
+  if (mShoulderStab) mShoulderStab.className = 'val';
+  if (mHeadStab) mHeadStab.className = 'val';
 
   startBtn.textContent = 'Start camera';
   startBtn.onclick = startCamera;
@@ -2494,8 +2546,8 @@ function startStabilitySnapshot() {
       const nyMin = noseYData.length ? Math.min(...noseYData) : 0;
       const headStability = Math.max(nxMax - nxMin, nyMax - nyMin) * 100;
 
-      setText(mShoulderStab, `${shoulderStability.toFixed(2)} var`);
-      setText(mHeadStab, `${headStability.toFixed(2)} var`);
+      setText(mShoulderStab, `${(shoulderStability / 100).toFixed(2)} var`);
+      setText(mHeadStab, `${(headStability / 100).toFixed(2)} var`);
 
       runAIEvaluation(shoulderStability, headStability);
       setTimeout(() => {
