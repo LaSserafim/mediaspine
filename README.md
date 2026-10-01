@@ -26,7 +26,7 @@ MediaSpine is a screening aid, not a medical device. See [Disclaimer](#disclaime
 3. Profile view. Neck deviation is the angle `atan(|ear.x - shoulder.x| / |ear.y - shoulder.y|)` in degrees. The page uses whichever side has the higher combined ear and shoulder visibility.
 4. Frontal view. Shoulder tilt is `|left shoulder.y - right shoulder.y| * 100`. Head tilt is `|left eye.y - right eye.y| * 100`. These are percentages of frame height. The AI prompt calls them degrees.
 5. Snapshot. "Take snapshot & AI evaluation" starts a 3 second countdown and records shoulder height and nose position on every processed frame. Shoulder stability is the range of shoulder height times 100. Head stability is the larger of the nose's horizontal and vertical ranges times 100. A higher number means less steady.
-6. Evaluation. The browser sends the metrics as a text string to `/api/evaluate`. The function adds the system prompt and forwards the request to Groq.
+6. Evaluation. The browser sends the metrics as a text string to `/api/evaluate`. The function adds the system prompt and forwards the request to DeepSeek.
 7. Result. The page renders the response. If the user is signed in, it also saves the scan.
 
 A scan is either profile or frontal, so the metrics from the other view are empty. A profile scan says nothing about tilt, and a frontal scan says nothing about neck deviation. The score counts an empty metric as zero penalty.
@@ -66,7 +66,7 @@ The reference ranges written into the AI prompt:
 
 ```
 index.html                      landing page and scanner (HTML, CSS and JS in one file)
-api/evaluate.js                 Groq proxy
+api/evaluate.js                 DeepSeek API proxy
 api/activity.js                 records sign-in activity in Supabase
 api/stats.js                    user counts from Supabase
 api/feedback.js                 feedback email over Gmail SMTP
@@ -87,7 +87,7 @@ The browser loads MediaPipe Pose 0.5.1675469404 and canvas-confetti 1.9.4 from j
 
 | Route | Method | What it does |
 |---|---|---|
-| `/api/evaluate` | POST | Body `{ "payload": "<metrics string>" }`. Calls Groq model `openai/gpt-oss-120b` with temperature 0.2 and JSON output, and returns the raw Groq response. |
+| `/api/evaluate` | POST | Body `{ "payload": "<metrics string>" }`. Calls DeepSeek model `deepseek-chat` with temperature 0.15 and JSON output, and returns the raw DeepSeek response. |
 | `/api/activity` | POST, GET | POST needs the header `Authorization: Bearer <Supabase access token>`. The function takes the user from the verified token, ignores any id in the body, records today's activity and returns `weeklyActive` and `daysActiveLast7Days`. It returns 401 for a missing or invalid token. GET with `?user_id=` returns the activity status for that user. |
 | `/api/stats` | GET | Returns `totalUsers`, `activeWeekly` and `activeToday` from the `user_activity` table. |
 | `/api/feedback` | POST | Body `{ name, email, message, score }`. Only `message` is required. Sends an email through Gmail SMTP. |
@@ -102,7 +102,7 @@ Set these in Vercel under Project Settings, Environment Variables. For local wor
 
 | Name | Required | Used by |
 |---|---|---|
-| `GROQ_API_KEY` | yes | `/api/evaluate` |
+| `DEEPSEEK_API_KEY` | yes | `/api/evaluate`. DeepSeek API key. |
 | `SUPABASE_SERVICE_ROLE_KEY` | yes | `/api/stats`, `/api/activity` |
 | `SMTP_PASS` | yes | `/api/feedback`. A Gmail app password for the sender account. |
 | `SMTP_USER` | no | `/api/feedback`. Sender address. The default is set in the code. |
@@ -141,7 +141,7 @@ Use Node 22 or newer. The Vercel project runs Node 24, and `@supabase/supabase-j
 npm install
 ```
 
-Create `.env.local` with the variables from the table above (`GROQ_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` at minimum, plus `SMTP_PASS` to test the feedback form), then:
+Create `.env.local` with the variables from the table above (`DEEPSEEK_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` at minimum, plus `SMTP_PASS` to test the feedback form), then:
 
 ```bash
 npm run dev
@@ -160,7 +160,7 @@ node smoke-test.js
 
 The smoke test looks for the Pose script tag in `index.html`, the model name in `api/evaluate.js`, `dist/index.html`, and the Supabase logic in `api/stats.js`, so build first.
 
-`node smoke-test.js https://mediaspine.vercel.app` checks a deployed site instead. It also posts one sample request to `/api/evaluate`, which uses one Groq call and one slot of that IP's rate limit.
+`node smoke-test.js https://mediaspine.vercel.app` checks a deployed site instead. It also posts one sample request to `/api/evaluate`, which uses one DeepSeek call and one slot of that IP's rate limit.
 
 ## Deploy
 
@@ -172,7 +172,7 @@ The Google sign-in redirect uses `window.location.origin`, so it follows whateve
 
 ## What leaves the device
 
-Video frames stay in the browser. The request to `/api/evaluate` carries the metrics string and nothing else, and the function forwards that string and the system prompt to Groq.
+Video frames stay in the browser. The request to `/api/evaluate` carries the metrics string and nothing else, and the function forwards that string and the system prompt to DeepSeek.
 
 For a signed-in user, the site also stores each scan's metrics and AI result in Supabase, and records the date of each session. When a user shares a result card, its score, severity, metrics and summary are stored in `shared_results`, and anyone with the link can open them. The feedback form emails whatever name, email and message the user enters.
 

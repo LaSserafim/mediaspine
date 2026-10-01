@@ -46,7 +46,7 @@ if (targetUrl) {
       if (apiRes.status === 200) {
         const data = await apiRes.json();
         if (data.choices && data.choices[0]?.message?.content) {
-          console.log('✅ [Live API] Groq AI evaluation returned 200 with valid content!');
+          console.log('✅ [Live API] DeepSeek AI evaluation returned 200 with valid content!');
         }
       } else if (apiRes.status === 429) {
         console.log('⚠️ [Live API] IP Rate limited (expected if quota exceeded)');
@@ -130,12 +130,12 @@ if (targetUrl) {
     console.log('✅ Top-level script executes cleanly with zero errors');
   }
 
-  console.log('\n--- [2/3] Checking api/evaluate.js Groq Model ---');
+  console.log('\n--- [2/3] Checking api/evaluate.js DeepSeek Model ---');
   const evaluateJs = fs.readFileSync('api/evaluate.js', 'utf8');
-  if (evaluateJs.includes('openai/gpt-oss-120b')) {
-    console.log('✅ Model set to openai/gpt-oss-120b');
+  if (evaluateJs.includes('deepseek-chat')) {
+    console.log('✅ Model set to deepseek-chat');
   } else {
-    console.error('❌ api/evaluate.js does not use openai/gpt-oss-120b');
+    console.error('❌ api/evaluate.js does not use deepseek-chat');
     process.exit(1);
   }
 
