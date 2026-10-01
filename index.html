@@ -205,39 +205,36 @@
   /* Hero Section */
   .hero {
     position: relative;
-    padding: 88px 0 68px;
+    padding: 80px 0 64px;
     background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
     border-bottom: 1px solid var(--line);
   }
   .hero-content {
-    max-width: 780px;
+    max-width: 760px;
   }
-
+  .hero-badge {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--turquoise-dark);
+    margin-bottom: 14px;
+    display: inline-block;
+  }
   .hero-ctas {
     display: flex;
     gap: 14px;
     flex-wrap: wrap;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
-
-  .telemetry-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    font-family: var(--font-mono);
-    font-size: 11.5px;
+  .hero-privacy-note {
+    font-size: 13.5px;
     color: var(--ink-soft);
+    line-height: 1.5;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+    max-width: 600px;
   }
-  .telemetry-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 4px;
-    background: var(--surface-tint);
-    border: 1px solid var(--line-turquoise);
-    color: var(--turquoise-dark);
+  .hero-privacy-note strong {
+    color: var(--ink-secondary);
     font-weight: 600;
   }
 
@@ -284,13 +281,13 @@
   ═══════════════════════════════════════════════════════════════════ */
   .graph-container {
     display: grid;
-    grid-template-columns: 1.25fr 0.75fr;
+    grid-template-columns: 1.35fr 0.65fr;
     gap: 32px;
     background: #FFFFFF;
     border: 1px solid var(--line);
     border-radius: 10px;
     padding: 28px;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+    box-shadow: 0 2px 16px rgba(15, 23, 42, 0.04);
   }
   @media (max-width: 960px) {
     .graph-container { grid-template-columns: 1fr; }
@@ -299,14 +296,14 @@
   .graph-visual-column {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 10px;
   }
 
   .graph-canvas-box {
     position: relative;
     width: 100%;
-    height: 310px;
-    background: var(--bg-subtle);
+    height: 380px;
+    background: #FFFFFF;
     border: 1px solid var(--line);
     border-radius: 8px;
     overflow: hidden;
@@ -341,7 +338,7 @@
 
   .graph-canvas-hud {
     position: absolute;
-    top: 10px;
+    top: 12px;
     left: 14px;
     right: 14px;
     display: flex;
@@ -353,55 +350,10 @@
     z-index: 5;
   }
   .graph-canvas-hud span {
-    background: rgba(255, 255, 255, 0.9);
-    padding: 3px 8px;
-    border-radius: 4px;
-    border: 1px solid var(--line);
-  }
-
-  .spine-three-box {
-    background: #FFFFFF;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 16px 18px;
-  }
-  .spine-three-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  .spine-three-canvas-wrap {
-    position: relative;
-    width: 100%;
-    height: 170px;
-    background: var(--bg-subtle);
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-  .spine-three-canvas-wrap canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-  .spine-three-hud {
-    position: absolute;
-    bottom: 8px;
-    left: 10px;
-    right: 10px;
-    display: flex;
-    justify-content: space-between;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--ink-soft);
     background: rgba(255, 255, 255, 0.92);
-    padding: 3px 8px;
+    padding: 4px 9px;
     border-radius: 4px;
     border: 1px solid var(--line);
-    pointer-events: none;
   }
   .graph-controls {
     display: flex;
@@ -1161,9 +1113,7 @@
 <header class="hero">
   <div class="wrap">
     <div class="hero-content">
-      <div class="eyebrow">
-        <span>SpineSafe NGO Platform</span>
-      </div>
+      <span class="hero-badge">SpineSafe NGO Platform · Open Source</span>
       <h1>Clinical posture screening, measured on-device.</h1>
       <p class="lede">Screen your neck angle, shoulder symmetry, and postural stability directly in your browser. Powered by 2D computer vision and clinical inference. Zero video frames uploaded.</p>
       
@@ -1172,10 +1122,9 @@
         <a href="#graph" class="btn btn-ghost">Explore cervical load graph</a>
       </div>
 
-      <div class="telemetry-row">
-        <span class="telemetry-pill">33 Pose Landmarks</span>
-        <span>WASM Execution · Zero Cloud Video · High-DPI Biomechanical Engine</span>
-      </div>
+      <p class="hero-privacy-note">
+        <strong>Private by design.</strong> Your webcam video is processed locally in your browser memory and never sent to a server. Only five numerical angles are interpreted.
+      </p>
     </div>
   </div>
 </header>
@@ -1218,22 +1167,7 @@
           <div id="graphTooltip" class="graph-tooltip"></div>
           <div class="graph-canvas-hud">
             <span>HD Retina Biomechanical Curve: Kapandji-Hansraj</span>
-            <span id="canvasScanNotice">Hover or drag across curve</span>
-          </div>
-        </div>
-
-        <!-- 2D Three.js Kinematic Cervical Spine Visualizer -->
-        <div class="spine-three-box">
-          <div class="spine-three-header">
-            <span class="eyebrow" style="margin-bottom:0; font-size:10px;">Three.js Cervical Kinematics (C1 to C7)</span>
-            <span id="spineThreeDeg" style="font-family:var(--font-mono); font-size:11.5px; color:var(--turquoise-dark); font-weight:600;">Cervical Flexion: 0.0°</span>
-          </div>
-          <div class="spine-three-canvas-wrap" id="spineCanvasWrap">
-            <canvas id="cervicalSpineCanvas"></canvas>
-            <div class="spine-three-hud">
-              <span>Vertebral Articulation: Atlas (C1) through C7</span>
-              <span id="spineThreeForce">Compressive Force Vector: 11.0 lbs (F_g)</span>
-            </div>
+            <span id="canvasScanNotice">Hover or drag to inspect curve</span>
           </div>
         </div>
       </div>
@@ -1355,7 +1289,7 @@
     <div class="report" id="report">
       <div class="ai-loading" id="aiLoading">
         <div class="spinner"></div>
-        <p>Synthesizing biomechanical assessment with DeepSeek AI…</p>
+        <p>Analyzing posture measurements and calculating alignment…</p>
       </div>
 
       <div id="aiResults" style="display:none;">
@@ -1451,21 +1385,22 @@
 
     <div class="testimony-grid">
       <div class="protocols-box">
-        <h3 style="margin-bottom:16px;">SpineSafe NGO Testing Protocols</h3>
-        
+        <h3 style="margin-bottom:12px;">SpineSafe NGO Testing Program</h3>
+        <p style="font-size:14px; color:var(--ink-secondary); line-height:1.6; margin-bottom:20px;">MediaSpine was developed to support student spinal screening initiatives. Rather than displaying unverified testimonials, we share our ongoing validation standards and invite verified field feedback.</p>
+
         <div class="protocol-item">
-          <div class="protocol-title">Protocol 01: Goniometer Angle Calibration</div>
-          <div class="protocol-desc">Screening trials were conducted on standard laptop webcams at 480x360 resolution to calibrate profile ear-to-shoulder angle calculations within a ±1.5 degree margin against physical goniometer benchmarks.</div>
+          <h4 style="font-size:14px; font-weight:600; color:var(--ink); margin-bottom:4px;">Goniometer Benchmark Calibration</h4>
+          <p class="protocol-desc">Angle calculations are calibrated against physical clinical goniometers, maintaining agreement within 1.5 degrees on standard laptop webcams without dedicated hardware.</p>
         </div>
 
         <div class="protocol-item">
-          <div class="protocol-title">Protocol 02: 3-Second Stability Hold Window</div>
-          <div class="protocol-desc">The 3-second snapshot duration was selected through testing to balance user stillness compliance with statistical variance accuracy across shoulder and nose coordinates.</div>
+          <h4 style="font-size:14px; font-weight:600; color:var(--ink); margin-bottom:4px;">Three-Second Stability Window</h4>
+          <p class="protocol-desc">The short hold window measures involuntary postural drift across shoulder and nose coordinates, identifying muscular endurance fatigue without requiring prolonged testing.</p>
         </div>
 
         <div class="protocol-item">
-          <div class="protocol-title">Protocol 03: Variable Lighting Tolerances</div>
-          <div class="protocol-desc">Landmark confidence thresholds were tuned to 0.5 to maintain continuous tracking across varied classroom, office, and home lighting environments.</div>
+          <h4 style="font-size:14px; font-weight:600; color:var(--ink); margin-bottom:4px;">Classroom and Office Lighting Testing</h4>
+          <p class="protocol-desc">Confidence thresholds are set to maintain stable tracking across typical indoor fluorescent, natural side-lit, and low-light environments.</p>
         </div>
       </div>
 
@@ -1758,13 +1693,13 @@
 
     // High-DPI Canvas Resizing
     let displayW = 620;
-    let displayH = 310;
+    let displayH = 380;
 
     function resizeToHD() {
       const dpr = Math.min(window.devicePixelRatio || 1, 3);
       const rect = canvasBox ? canvasBox.getBoundingClientRect() : canvas.getBoundingClientRect();
       displayW = Math.round(rect.width || 620);
-      displayH = Math.round(rect.height || 310);
+      displayH = Math.round(rect.height || 380);
 
       const targetW = Math.round(displayW * dpr);
       const targetH = Math.round(displayH * dpr);
@@ -1778,7 +1713,6 @@
 
     let isHovering = false;
     let hoverAngle = 0;
-    let hoverX = 0;
     let isDragging = false;
 
     function renderGraph() {
@@ -1786,15 +1720,45 @@
       ctx.clearRect(0, 0, displayW, displayH);
 
       const padX = 54;
-      const padY = 24;
+      const padY = 32;
       const graphW = displayW - padX - 24;
-      const graphH = displayH - padY - 32;
+      const graphH = displayH - padY - 36;
 
-      // Subtle Millimeter Grid
+      // 1. Shaded Clinical Risk Zones
+      const zones = [
+        { from: 0, to: 10, fill: 'rgba(13, 148, 136, 0.05)', label: 'OPTIMAL (0-10°)', color: '#0F766E' },
+        { from: 10, to: 25, fill: 'rgba(217, 119, 6, 0.04)', label: 'MILD STRAIN (10-25°)', color: '#B45309' },
+        { from: 25, to: 40, fill: 'rgba(234, 88, 12, 0.05)', label: 'MODERATE (25-40°)', color: '#C2410C' },
+        { from: 40, to: 60, fill: 'rgba(220, 38, 38, 0.05)', label: 'SEVERE (40-60°)', color: '#B91C1C' }
+      ];
+
+      for (const z of zones) {
+        const x1 = padX + (z.from / 60) * graphW;
+        const x2 = padX + (z.to / 60) * graphW;
+        ctx.fillStyle = z.fill;
+        ctx.fillRect(x1, padY, x2 - x1, graphH);
+
+        if (z.from > 0) {
+          ctx.save();
+          ctx.strokeStyle = 'rgba(203, 213, 225, 0.7)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([2, 3]);
+          ctx.beginPath();
+          ctx.moveTo(x1, padY);
+          ctx.lineTo(x1, padY + graphH);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        ctx.font = '600 9.5px "IBM Plex Mono", monospace';
+        ctx.fillStyle = z.color;
+        ctx.textAlign = 'center';
+        ctx.fillText(z.label, x1 + (x2 - x1) / 2, padY + 14);
+      }
+
+      // 2. Horizontal Force Grid Lines (10 to 60 lbs)
       ctx.strokeStyle = '#E2E8F0';
       ctx.lineWidth = 1;
-
-      // Horizontal Force Lines (10 to 60 lbs)
       ctx.font = '500 10.5px "IBM Plex Mono", monospace';
       ctx.fillStyle = '#94A3B8';
       ctx.textAlign = 'right';
@@ -1808,7 +1772,7 @@
         ctx.fillText(`${lbs} lbs`, padX - 8, y + 3.5);
       }
 
-      // Vertical Degree Lines (0° to 60°)
+      // 3. Vertical Degree Lines (0° to 60°)
       ctx.textAlign = 'center';
       for (let deg = 0; deg <= 60; deg += 15) {
         const x = Math.round(padX + (deg / 60) * graphW) + 0.5;
@@ -1819,7 +1783,22 @@
         ctx.fillText(`${deg}°`, x, padY + graphH + 18);
       }
 
-      // Continuous Mathematical Curve
+      // Reference Posture Markers along X axis
+      const refPins = [
+        { deg: 0, text: 'Neutral' },
+        { deg: 15, text: 'Desktop' },
+        { deg: 30, text: 'Laptop' },
+        { deg: 45, text: 'Phone' },
+        { deg: 60, text: 'Slump' }
+      ];
+      ctx.font = '500 9.5px var(--font-sans)';
+      ctx.fillStyle = '#64748B';
+      for (const p of refPins) {
+        const px = padX + (p.deg / 60) * graphW;
+        ctx.fillText(p.text, px, padY + graphH + 32);
+      }
+
+      // 4. Continuous Mathematical Curve (Hansraj Biomechanics)
       ctx.beginPath();
       for (let deg = 0; deg <= 60; deg += 0.5) {
         const x = padX + (deg / 60) * graphW;
@@ -1835,7 +1814,7 @@
       ctx.lineTo(padX, padY + graphH);
       ctx.closePath();
       const grad = ctx.createLinearGradient(0, padY, 0, padY + graphH);
-      grad.addColorStop(0, 'rgba(13, 148, 136, 0.28)');
+      grad.addColorStop(0, 'rgba(13, 148, 136, 0.26)');
       grad.addColorStop(0.65, 'rgba(13, 148, 136, 0.08)');
       grad.addColorStop(1, 'rgba(13, 148, 136, 0.00)');
       ctx.fillStyle = grad;
@@ -1849,23 +1828,21 @@
       ctx.lineCap = 'round';
       ctx.stroke();
 
-      // Hover scan ray line on mouse movement
+      // 5. Hover Scanning Ray (on mouse movement)
       if (isHovering && hoverAngle >= 0 && hoverAngle <= 60) {
         const hX = padX + (hoverAngle / 60) * graphW;
         const hLbs = calculateLoad(hoverAngle);
         const hY = padY + graphH - ((hLbs - 10) / 50) * graphH;
 
-        // Vertical scan ray
         ctx.save();
         ctx.setLineDash([3, 3]);
-        ctx.strokeStyle = 'rgba(13, 148, 136, 0.55)';
+        ctx.strokeStyle = 'rgba(13, 148, 136, 0.65)';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.moveTo(hX, padY);
         ctx.lineTo(hX, padY + graphH);
         ctx.stroke();
 
-        // Horizontal reference line
         ctx.beginPath();
         ctx.moveTo(padX, hY);
         ctx.lineTo(hX, hY);
@@ -1873,18 +1850,18 @@
         ctx.restore();
 
         // Hover point glow
-        ctx.fillStyle = 'rgba(20, 184, 166, 0.3)';
+        ctx.fillStyle = 'rgba(20, 184, 166, 0.35)';
         ctx.beginPath();
-        ctx.arc(hX, hY, 11, 0, Math.PI * 2);
+        ctx.arc(hX, hY, 12, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.fillStyle = '#14B8A6';
         ctx.beginPath();
-        ctx.arc(hX, hY, 5, 0, Math.PI * 2);
+        ctx.arc(hX, hY, 5.5, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // Active interactive marker (Current Slider State)
+      // 6. Active Interactive Marker (Current Angle)
       const curX = padX + (state.angle / 60) * graphW;
       const curLbs = calculateLoad(state.angle);
       const curY = padY + graphH - ((curLbs - 10) / 50) * graphH;
@@ -1901,16 +1878,16 @@
       ctx.stroke();
       ctx.restore();
 
-      // Active outer glow ring
-      ctx.fillStyle = 'rgba(13, 148, 136, 0.2)';
+      // Active outer glow halo
+      ctx.fillStyle = 'rgba(13, 148, 136, 0.22)';
       ctx.beginPath();
-      ctx.arc(curX, curY, 14, 0, Math.PI * 2);
+      ctx.arc(curX, curY, 15, 0, Math.PI * 2);
       ctx.fill();
 
       // Active solid point marker
       ctx.fillStyle = '#0F766E';
       ctx.beginPath();
-      ctx.arc(curX, curY, 7.5, 0, Math.PI * 2);
+      ctx.arc(curX, curY, 8, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.fillStyle = '#FFFFFF';
@@ -1918,7 +1895,23 @@
       ctx.arc(curX, curY, 3.5, 0, Math.PI * 2);
       ctx.fill();
 
-      // If user has a measured scan angle, draw persistent gold marker
+      // Floating callout badge directly above active point
+      const badgeW = 96;
+      const badgeH = 22;
+      const badgeX = Math.max(padX + 2, Math.min(padX + graphW - badgeW - 2, curX - badgeW / 2));
+      const badgeY = Math.max(padY + 18, curY - 26);
+
+      ctx.fillStyle = '#0F172A';
+      ctx.beginPath();
+      ctx.roundRect(badgeX, badgeY - 14, badgeW, badgeH, 4);
+      ctx.fill();
+
+      ctx.font = '600 10.5px "IBM Plex Mono", monospace';
+      ctx.fillStyle = '#2DD4BF';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${curLbs.toFixed(1)} lbs · ${state.angle.toFixed(0)}°`, badgeX + badgeW / 2, badgeY + 1);
+
+      // 7. Measured Scan Marker (if user ran camera scan)
       if (state.measuredScanAngle != null) {
         const sAngle = Math.max(0, Math.min(60, state.measuredScanAngle));
         const sX = padX + (sAngle / 60) * graphW;
@@ -1927,12 +1920,12 @@
 
         ctx.fillStyle = 'rgba(217, 119, 6, 0.25)';
         ctx.beginPath();
-        ctx.arc(sX, sY, 13, 0, Math.PI * 2);
+        ctx.arc(sX, sY, 14, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.fillStyle = '#D97706';
         ctx.beginPath();
-        ctx.arc(sX, sY, 7, 0, Math.PI * 2);
+        ctx.arc(sX, sY, 7.5, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.fillStyle = '#FFFFFF';
@@ -1945,132 +1938,6 @@
         ctx.textAlign = 'left';
         ctx.fillText(`Your Scan (${state.measuredScanAngle.toFixed(1)}°)`, sX + 10, sY - 6);
       }
-    }
-
-    // ═══════════════════════════════════════════════════════════════════
-    // 2D THREE.JS CERVICAL SPINE KINEMATICS MODEL
-    // ═══════════════════════════════════════════════════════════════════
-    const spineCanvas = document.getElementById('cervicalSpineCanvas');
-    let spineRenderer = null;
-    let spineScene = null;
-    let spineCam = null;
-    const discs = [];
-    let forceArrowLine = null;
-    let forceArrowHead = null;
-    let occiputMesh = null;
-
-    if (spineCanvas && window.THREE) {
-      const THREE = window.THREE;
-      spineScene = new THREE.Scene();
-      spineCam = new THREE.OrthographicCamera(-180, 180, 85, -85, 0, 100);
-      spineCam.position.z = 10;
-
-      spineRenderer = new THREE.WebGLRenderer({ canvas: spineCanvas, alpha: true, antialias: true });
-      spineRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      const sRect = spineCanvas.getBoundingClientRect();
-      spineRenderer.setSize(sRect.width || 620, sRect.height || 170);
-
-      // Occiput (Skull Center)
-      const occGeom = new THREE.CircleGeometry(14, 32);
-      const occMat = new THREE.MeshBasicMaterial({ color: 0x0F766E });
-      occiputMesh = new THREE.Mesh(occGeom, occMat);
-      spineScene.add(occiputMesh);
-
-      // 7 Cervical Vertebrae Discs (C1 through C7)
-      const discGeom = new THREE.CircleGeometry(7.5, 24);
-      const discMat = new THREE.MeshBasicMaterial({ color: 0x0D9488 });
-
-      for (let i = 0; i < 7; i++) {
-        const m = new THREE.Mesh(discGeom, discMat);
-        spineScene.add(m);
-        discs.push(m);
-      }
-
-      // Gravitational Force Vector Arrow originating at Occiput
-      const arrowGeom = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(0, 0, 2),
-        new THREE.Vector3(0, -35, 2)
-      ]);
-      const arrowMat = new THREE.LineBasicMaterial({ color: 0x0D9488, linewidth: 3 });
-      forceArrowLine = new THREE.Line(arrowGeom, arrowMat);
-      spineScene.add(forceArrowLine);
-
-      // Arrowhead cone
-      const coneGeom = new THREE.ConeGeometry(5, 10, 16);
-      const coneMat = new THREE.MeshBasicMaterial({ color: 0x0D9488 });
-      forceArrowHead = new THREE.Mesh(coneGeom, coneMat);
-      forceArrowHead.rotation.x = Math.PI;
-      spineScene.add(forceArrowHead);
-    }
-
-    const spineThreeDeg = document.getElementById('spineThreeDeg');
-    const spineThreeForce = document.getElementById('spineThreeForce');
-
-    function updateSpineModel(deg) {
-      if (!spineRenderer || !spineScene || !spineCam) return;
-      const THREE = window.THREE;
-      const flexRad = (deg * Math.PI) / 180;
-
-      // Base anchor point (T1 level at bottom center)
-      const baseY = -55;
-      const baseX = -30;
-      const totalLength = 100;
-
-      for (let i = 0; i < 7; i++) {
-        const frac = (i + 1) / 8;
-        const curAngle = flexRad * frac;
-        // Articulate along sagittal curve
-        const x = baseX + Math.sin(curAngle) * (totalLength * frac);
-        const y = baseY + Math.cos(curAngle) * (totalLength * frac);
-        discs[i].position.set(x, y, 1);
-      }
-
-      // Occiput Position (Head Center)
-      const headX = baseX + Math.sin(flexRad) * totalLength;
-      const headY = baseY + Math.cos(flexRad) * totalLength + 16;
-      if (occiputMesh) occiputMesh.position.set(headX, headY, 1);
-
-      // Gravitational Vector Length & Color scaling with load
-      const load = calculateLoad(deg);
-      const arrowLen = 22 + ((load - 11) / 49) * 65;
-
-      if (forceArrowLine) {
-        const pts = [
-          new THREE.Vector3(headX, headY, 2),
-          new THREE.Vector3(headX, headY - arrowLen, 2)
-        ];
-        forceArrowLine.geometry.setFromPoints(pts);
-        const hexColor = deg <= 20 ? 0x0D9488 : deg <= 40 ? 0xD97706 : 0xDC2626;
-        forceArrowLine.material.color.setHex(hexColor);
-        if (forceArrowHead) {
-          forceArrowHead.position.set(headX, headY - arrowLen, 2);
-          forceArrowHead.material.color.setHex(hexColor);
-        }
-      }
-
-      if (spineThreeDeg) spineThreeDeg.textContent = `Cervical Flexion: ${deg.toFixed(1)}°`;
-      if (spineThreeForce) {
-        const mult = (load / 11.0).toFixed(1);
-        spineThreeForce.textContent = `Compressive Force Vector: ${load.toFixed(1)} lbs (${mult}x F_g)`;
-      }
-
-      spineRenderer.render(spineScene, spineCam);
-    }
-
-    // Interactive mouse movement on the spine model canvas
-    if (spineCanvas) {
-      spineCanvas.parentElement.addEventListener('mousemove', (e) => {
-        const rect = spineCanvas.getBoundingClientRect();
-        const normX = (e.clientX - rect.left) / rect.width - 0.5;
-        if (occiputMesh && window.gsap) {
-          window.gsap.to(occiputMesh.position, {
-            x: occiputMesh.position.x + normX * 4,
-            duration: 0.2,
-            ease: 'power1.out',
-            onUpdate: () => spineRenderer.render(spineScene, spineCam)
-          });
-        }
-      });
     }
 
     function updateReadouts(deg) {
@@ -2117,7 +1984,6 @@
       }
 
       renderGraph();
-      updateSpineModel(deg);
     }
 
     function setAngleSmooth(targetDeg) {
@@ -2158,9 +2024,7 @@
       });
     });
 
-    // ═══════════════════════════════════════════════════════════════════
-    // MOUSE MOVEMENT INTERACTION ON GRAPH CANVAS
-    // ═══════════════════════════════════════════════════════════════════
+    // Mouse Movement Interaction on Graph Canvas
     function handleGraphPointer(e) {
       const rect = canvas.getBoundingClientRect();
       const clientX = e.clientX - rect.left;
@@ -2214,12 +2078,7 @@
     });
 
     window.addEventListener('resize', () => {
-      if (spineRenderer && spineCanvas) {
-        const sRect = spineCanvas.getBoundingClientRect();
-        spineRenderer.setSize(sRect.width || 620, sRect.height || 170);
-      }
       renderGraph();
-      updateSpineModel(state.angle);
     });
 
     updateReadouts(0);
