@@ -150,8 +150,8 @@
   nav .wrap {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    height: 72px;
+    gap: 24px;
+    min-height: 72px;
   }
   .logo-wrap {
     display: flex;
@@ -169,24 +169,42 @@
     color: var(--turquoise);
   }
 
+  .logo-wrap { flex-shrink: 0; white-space: nowrap; }
   .navlinks {
     display: flex;
     align-items: center;
-    gap: 28px;
-    font-size: 13.5px;
+    justify-content: center;
+    flex: 1;
+    gap: 26px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--ink-secondary);
+    white-space: nowrap;
   }
   .navlinks a {
     transition: color 0.15s;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    padding: 6px 0;
   }
-  .navlinks a:hover { color: var(--turquoise); }
+  .navlinks a:hover { color: var(--turquoise-dark); }
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  @media (max-width: 1200px) {
+    #userEmail, #userActiveBadge { display: none !important; }
+  }
+  @media (max-width: 1000px) {
+    nav .wrap { flex-wrap: wrap; gap: 8px 16px; padding-top: 10px; padding-bottom: 10px; }
+    .navlinks { order: 3; flex-basis: 100%; justify-content: flex-start; gap: 20px; overflow-x: auto; }
+    .nav-actions { margin-left: auto; }
+  }
 
   .github-pill {
-    padding: 6px 12px;
+    padding: 7px 9px;
     border-radius: 6px;
     background: var(--bg-subtle);
     border: 1px solid var(--line);
@@ -698,7 +716,7 @@
     color: var(--ink-secondary);
     line-height: 1.6;
   }
-  .report-cell ol {
+  .report-cell ul, .report-cell ol {
     padding-left: 18px;
   }
   .report-cell li { margin-bottom: 10px; }
@@ -866,11 +884,14 @@
   }
   .progress-stats-row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     margin-bottom: 24px;
   }
-  @media (max-width: 640px) {
+  @media (max-width: 900px) {
+    .progress-stats-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 520px) {
     .progress-stats-row { grid-template-columns: 1fr; }
   }
   .progress-stat-card {
@@ -911,7 +932,7 @@
   .chart-canvas-wrap {
     position: relative;
     width: 100%;
-    height: 240px;
+    height: 280px;
   }
   .chart-canvas-wrap canvas {
     width: 100%;
@@ -925,22 +946,75 @@
     color: var(--ink-soft);
   }
 
-  .history-list {
+  .metric-chips {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .history-item {
-    background: #FFFFFF;
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 12px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     flex-wrap: wrap;
     gap: 8px;
-    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  .chip {
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: #FFFFFF;
+    color: var(--ink-secondary);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .chip:hover { border-color: var(--turquoise); color: var(--turquoise-dark); }
+  .chip:focus-visible { outline: 2px solid var(--turquoise); outline-offset: 2px; }
+  .chip.active {
+    background: var(--turquoise-dark);
+    border-color: var(--turquoise-dark);
+    color: #FFFFFF;
+  }
+  .chart-tip {
+    position: absolute;
+    display: none;
+    pointer-events: none;
+    z-index: 5;
+    background: var(--ink);
+    color: #FFFFFF;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .scan-list-scroll { max-height: 520px; overflow-y: auto; padding-right: 4px; }
+  .scan-list { display: flex; flex-direction: column; gap: 10px; }
+  .scan-row {
+    background: #FFFFFF;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 190px 150px 1fr;
+    gap: 16px;
+    align-items: center;
+  }
+  .scan-when strong { display: block; font-size: 14px; color: var(--ink); }
+  .scan-when span { font-size: 12px; color: var(--ink-soft); }
+  .sev-badge {
+    justify-self: start;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .scan-metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .scan-metrics .sm span { display: block; font-size: 11px; color: var(--ink-soft); }
+  .scan-metrics .sm b { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--ink-muted); }
+  .scan-metrics .sm small { display: block; font-size: 11px; color: var(--ink-soft); }
+  @media (max-width: 900px) {
+    .scan-row { grid-template-columns: 1fr auto; }
+    .scan-metrics { grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); }
   }
 
   /* ═══════════════════════════════════════════════════════════════════
@@ -1086,14 +1160,15 @@
     </a>
     <div class="navlinks">
       <a href="#graph">Spine Graph</a>
-      <a href="#scan">Function</a>
+      <a href="#scan">Scan</a>
       <a href="#benefits">Benefits</a>
-      <a href="#testimony">Testimony</a>
+      <a href="#testimony">Testing</a>
       <a href="#feedback">Feedback</a>
       <a href="#progress" id="progressNav" style="display:none;">My Progress</a>
-      <a href="https://github.com/LaSserafim/mediaspine" target="_blank" rel="noopener noreferrer" class="github-pill">
+    </div>
+    <div class="nav-actions">
+      <a href="https://github.com/LaSserafim/mediaspine" target="_blank" rel="noopener noreferrer" class="github-pill" aria-label="MediaSpine on GitHub">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-        <span>GitHub</span>
       </a>
       <button class="btn btn-ghost" id="authBtn" onclick="window.signInWithGoogle()" style="padding:7px 14px; font-size:12px; display:inline-flex; align-items:center; gap:6px;">
         <svg width="13" height="13" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
@@ -1102,7 +1177,7 @@
       <div id="userMenu" style="display:none; align-items:center; gap:8px;">
         <img id="userAvatar" src="" alt="Avatar" style="display:none; width:22px; height:22px; border-radius:50%; border:1px solid var(--line); object-fit:cover;">
         <span id="userEmail" style="font-family:var(--font-mono); font-size:12px; color:var(--turquoise-dark); max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
-        <span id="userActiveBadge" style="display:none; font-family:var(--font-mono); font-size:10px; padding:2px 7px; border-radius:3px; background:var(--turquoise-pale); color:var(--turquoise-dark); font-weight:600;" title="Active User: at least 1 session in past 7 days">● Active (1x/wk)</span>
+        <span id="userActiveBadge" style="display:none; font-family:var(--font-mono); font-size:10px; padding:2px 7px; border-radius:3px; background:var(--turquoise-pale); color:var(--turquoise-dark); font-weight:600;" title="Active user: at least one session in the past 7 days">● Active</span>
         <button class="btn btn-ghost" onclick="window.signOutUser()" style="padding:5px 10px; font-size:11px;">Sign out</button>
       </div>
     </div>
@@ -1295,26 +1370,26 @@
       <div id="aiResults" style="display:none;">
         <div class="report-top">
           <div class="report-summary">
-            <div class="eyebrow">Clinical summary</div>
+            <div class="eyebrow">Your result</div>
             <p id="aiSummary"></p>
           </div>
           <div class="severity-box">
-            <div class="eyebrow">Severity rating</div>
+            <div class="eyebrow">Severity</div>
             <div class="level" id="aiSeverity"></div>
           </div>
         </div>
 
         <div class="report-grid">
           <div class="report-cell">
-            <h4>Current alignment issues</h4>
-            <p id="aiCurrent"></p>
+            <h4>What may be causing this</h4>
+            <ul id="aiCauses"></ul>
           </div>
           <div class="report-cell">
-            <h4>Future functional risks</h4>
-            <p id="aiFuture"></p>
+            <h4>What could happen next</h4>
+            <ul id="aiRisks"></ul>
           </div>
           <div class="report-cell">
-            <h4>Corrective exercises</h4>
+            <h4>What to do</h4>
             <ol id="aiRecs"></ol>
           </div>
         </div>
@@ -1378,36 +1453,36 @@
 <section id="testimony">
   <div class="wrap">
     <div class="section-head">
-      <div class="eyebrow">Pilot testing &amp; feedback</div>
-      <h2>Transparent calibration and tester communication.</h2>
-      <p>We do not fabricate fake reviews. Instead, here are the real testing protocols used during pilot calibration, alongside our verified tester feedback channel.</p>
+      <div class="eyebrow">How we test</div>
+      <h2>How we check that the readings are reliable.</h2>
+      <p>These are the checks we ran during pilot testing. If you try MediaSpine, tell us how it went.</p>
     </div>
 
     <div class="testimony-grid">
       <div class="protocols-box">
-        <h3 style="margin-bottom:12px;">SpineSafe NGO Testing Program</h3>
-        <p style="font-size:14px; color:var(--ink-secondary); line-height:1.6; margin-bottom:20px;">MediaSpine was developed to support student spinal screening initiatives. Rather than displaying unverified testimonials, we share our ongoing validation standards and invite verified field feedback.</p>
+        <h3 style="margin-bottom:12px;">SpineSafe pilot testing</h3>
+        <p style="font-size:14px; color:var(--ink-secondary); line-height:1.6; margin-bottom:20px;">MediaSpine was built to help with student spine screening. Instead of showing reviews we can't verify, we explain how we test it and ask the people who use it for honest feedback.</p>
 
         <div class="protocol-item">
-          <h4 style="font-size:14px; font-weight:600; color:var(--ink); margin-bottom:4px;">Goniometer Benchmark Calibration</h4>
-          <p class="protocol-desc">Angle calculations are calibrated against physical clinical goniometers, maintaining agreement within 1.5 degrees on standard laptop webcams without dedicated hardware.</p>
+          <h4 style="font-size:14px; font-weight:600; color:var(--ink); margin-bottom:4px;">Angles checked against a real goniometer</h4>
+          <p class="protocol-desc">We compared the app's angles with a clinical goniometer. On a normal laptop webcam, the two agreed to within 1.5 degrees.</p>
         </div>
 
         <div class="protocol-item">
-          <h4 style="font-size:14px; font-weight:600; color:var(--ink); margin-bottom:4px;">Three-Second Stability Window</h4>
-          <p class="protocol-desc">The short hold window measures involuntary postural drift across shoulder and nose coordinates, identifying muscular endurance fatigue without requiring prolonged testing.</p>
+          <h4 style="font-size:14px; font-weight:600; color:var(--ink); margin-bottom:4px;">A short 3-second hold</h4>
+          <p class="protocol-desc">You hold still for three seconds. We measure how much your shoulders and head drift in that time, which shows how steadily you hold your posture.</p>
         </div>
 
         <div class="protocol-item">
-          <h4 style="font-size:14px; font-weight:600; color:var(--ink); margin-bottom:4px;">Classroom and Office Lighting Testing</h4>
-          <p class="protocol-desc">Confidence thresholds are set to maintain stable tracking across typical indoor fluorescent, natural side-lit, and low-light environments.</p>
+          <h4 style="font-size:14px; font-weight:600; color:var(--ink); margin-bottom:4px;">Works in everyday lighting</h4>
+          <p class="protocol-desc">We tested in classrooms, offices, window light and dim rooms, so tracking stays steady in normal indoor conditions.</p>
         </div>
       </div>
 
       <!-- Feedback Form -->
       <div class="feedback-box" id="feedback">
-        <h3 style="margin-bottom:8px;">Share Observations or Feedback</h3>
-        <p style="font-size:13px; color:var(--ink-soft); margin-bottom:20px;">Messages dispatch directly to the engineering team via authenticated Gmail SMTP.</p>
+        <h3 style="margin-bottom:8px;">Tell us how it went</h3>
+        <p style="font-size:13px; color:var(--ink-soft); margin-bottom:20px;">Your message goes straight to our team.</p>
 
         <form id="feedbackForm">
           <div class="field">
@@ -1419,8 +1494,8 @@
             <input type="email" id="fbEmail" name="email" placeholder="name@example.com">
           </div>
           <div class="field">
-            <label for="fbMsg">Observations or Message</label>
-            <textarea id="fbMsg" name="message" required placeholder="What was your experience with the angle tracking or report?"></textarea>
+            <label for="fbMsg">Your message</label>
+            <textarea id="fbMsg" name="message" required placeholder="What worked well? What was confusing?"></textarea>
           </div>
           <button type="submit" class="btn btn-primary" style="width:100%;">Send feedback →</button>
         </form>
@@ -1438,48 +1513,59 @@
 <section class="progress-section" id="progress">
   <div class="wrap">
     <div class="section-head">
-      <div class="eyebrow">Personal tracking</div>
+      <div class="eyebrow">Your record</div>
       <h2>My Progress</h2>
-      <p>Historical posture readings and clinical screening trends over time.</p>
+      <p>Every scan you take while signed in is saved here with its date, time and severity.</p>
     </div>
 
     <div class="progress-stats-row" id="progressStats">
       <div class="progress-stat-card">
-        <div class="label">Best Neck Angle</div>
+        <div class="label">Total scans</div>
+        <div class="val" id="progTotalScans">0</div>
+      </div>
+      <div class="progress-stat-card">
+        <div class="label">Latest severity</div>
+        <div class="val" id="progLatest">-</div>
+      </div>
+      <div class="progress-stat-card">
+        <div class="label">Best score</div>
         <div class="val" id="progBestScore">-</div>
       </div>
       <div class="progress-stat-card">
-        <div class="label">Active Streak</div>
+        <div class="label">Scan streak</div>
         <div class="val" id="progStreak">0 days</div>
       </div>
-      <div class="progress-stat-card">
-        <div class="label">Total Scans</div>
-        <div class="val" id="progTotalScans">0</div>
-      </div>
     </div>
 
-    <div class="chart-box">
-      <div class="chart-header">
-        <div>
-          <h3>Neck Deviation Angle Over Time</h3>
-          <span style="font-family:var(--font-mono); font-size:11px; color:var(--turquoise-dark);">Lower is better (0° = Neutral plumb line)</span>
+    <div class="chart-box progress-empty" id="progressEmpty" style="display:none;">
+      <p>No scans recorded yet. Complete your first scan above to start your record.</p>
+      <a href="#scan" class="btn btn-primary" style="margin-top:12px; font-size:13px;">Start first scan →</a>
+    </div>
+
+    <div id="progressBody">
+      <div class="chart-box">
+        <div class="chart-header">
+          <div>
+            <h3>Your readings over time</h3>
+            <span id="progressChartHint" style="font-family:var(--font-mono); font-size:11px; color:var(--turquoise-dark);"></span>
+          </div>
+          <button class="btn btn-ghost" id="shareProgressBtn" style="padding:6px 14px; font-size:12px;">Share latest result ↗</button>
         </div>
-        <button class="btn btn-ghost" id="shareProgressBtn" style="padding:6px 14px; font-size:12px;">Share progress card ↗</button>
+
+        <div class="metric-chips" id="progressChips"></div>
+
+        <div class="progress-empty" id="progressMetricEmpty" style="display:none;"></div>
+
+        <div class="chart-canvas-wrap" id="progressChartWrap">
+          <canvas id="progressCanvas" role="img" aria-label="Line chart of your posture readings over time"></canvas>
+          <div class="chart-tip" id="progressTip"></div>
+        </div>
       </div>
 
-      <div class="progress-empty" id="progressEmpty" style="display:none;">
-        <p>No scans recorded yet. Complete your first scan above to start tracking your posture progression over time.</p>
-        <a href="#scan" class="btn btn-primary" style="margin-top:12px; font-size:13px;">Start First Scan →</a>
+      <div id="progressListWrap">
+        <h4 style="font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); margin-bottom:12px;">Scan record</h4>
+        <div class="scan-list-scroll"><div class="scan-list" id="progressList"></div></div>
       </div>
-
-      <div class="chart-canvas-wrap" id="progressChartWrap">
-        <canvas id="progressCanvas"></canvas>
-      </div>
-    </div>
-
-    <div id="progressListWrap">
-      <h4 style="font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); margin-bottom:12px;">Recent Scans</h4>
-      <div class="history-list" id="progressList"></div>
     </div>
   </div>
 </section>
@@ -2147,8 +2233,8 @@ const aiLoading   = document.getElementById('aiLoading');
 const aiResults   = document.getElementById('aiResults');
 const aiSummary   = document.getElementById('aiSummary');
 const aiSeverity  = document.getElementById('aiSeverity');
-const aiCurrent   = document.getElementById('aiCurrent');
-const aiFuture    = document.getElementById('aiFuture');
+const aiCauses    = document.getElementById('aiCauses');
+const aiRisks     = document.getElementById('aiRisks');
 const aiRecs      = document.getElementById('aiRecs');
 const csvBtn      = document.getElementById('csvBtn');
 const resetBtn    = document.getElementById('resetBtn');
@@ -2593,8 +2679,8 @@ function computePostureScore(m) {
     return Math.min(7.5, 6.2 + (stab - 0.10) * 8);
   };
 
-  const sStabPenalty = calcStab(sStab / 100);
-  const hStabPenalty = calcStab(hStab / 100);
+  const sStabPenalty = calcStab(sStab);
+  const hStabPenalty = calcStab(hStab);
 
   const total = neckPenalty + shoulderPenalty + headPenalty + sStabPenalty + hStabPenalty;
   return Math.max(0, Math.min(100, Math.round(100 - total)));
@@ -2615,21 +2701,46 @@ function severityFor(score) {
 /* ═══════════════════════════════════════════════════════════════════
    DEEPSEEK AI EVALUATION CLIENT
 ═══════════════════════════════════════════════════════════════════ */
+function severityColor(label) {
+  if (label === 'Normal' || label === 'Very Mild') return '#0F766E';
+  if (label === 'Mild' || label === 'Moderate') return '#B45309';
+  return '#B91C1C';
+}
+
+function fillList(el, items, fallback) {
+  if (!el) return;
+  const list = (Array.isArray(items) ? items : [items]).filter(t => typeof t === 'string' && t.trim());
+  if (!list.length && fallback) list.push(fallback);
+  el.replaceChildren(...list.map(t => {
+    const li = document.createElement('li');
+    li.textContent = t;
+    return li;
+  }));
+}
+
 async function runAIEvaluation(shoulderStability, headStability) {
   if (!latestMetrics) return;
 
+  // latestMetrics changes on every camera frame; freeze what is being evaluated and saved.
+  // Stability is stored as variance (range of movement), the unit the scoring thresholds use.
+  const scan = {
+    ...latestMetrics,
+    shoulderStability: shoulderStability / 100,
+    headStability: headStability / 100
+  };
+
   const parts = [];
-  if (latestMetrics.neckDeviationAngle != null) {
-    parts.push(`Neck Deviation Angle: ${latestMetrics.neckDeviationAngle.toFixed(1)}°`);
+  if (scan.neckDeviationAngle != null) {
+    parts.push(`Neck Deviation Angle: ${scan.neckDeviationAngle.toFixed(1)}°`);
   }
-  if (latestMetrics.shoulderTilt != null) {
-    parts.push(`Shoulder Tilt: ${latestMetrics.shoulderTilt.toFixed(1)}°`);
+  if (scan.shoulderTilt != null) {
+    parts.push(`Shoulder Tilt: ${scan.shoulderTilt.toFixed(1)}°`);
   }
-  if (latestMetrics.headTilt != null) {
-    parts.push(`Head Tilt: ${latestMetrics.headTilt.toFixed(1)}°`);
+  if (scan.headTilt != null) {
+    parts.push(`Head Tilt: ${scan.headTilt.toFixed(1)}°`);
   }
-  parts.push(`Shoulder Stability: ${(shoulderStability / 100).toFixed(3)} variance over hold window`);
-  parts.push(`Head Stability: ${(headStability / 100).toFixed(3)} variance over hold window`);
+  parts.push(`Shoulder Stability: ${scan.shoulderStability.toFixed(3)} variance over hold window`);
+  parts.push(`Head Stability: ${scan.headStability.toFixed(3)} variance over hold window`);
 
   const payloadString = parts.join(', ');
 
@@ -2656,30 +2767,22 @@ async function runAIEvaluation(shoulderStability, headStability) {
     consumeEvalQuota();
 
     // Map scan to interactive biomechanical graph
-    if (latestMetrics.neckDeviationAngle != null && window.updateBiomechanicalGraphScan) {
-      window.updateBiomechanicalGraphScan(latestMetrics.neckDeviationAngle);
+    if (scan.neckDeviationAngle != null && window.updateBiomechanicalGraphScan) {
+      window.updateBiomechanicalGraphScan(scan.neckDeviationAngle);
     }
 
     // Populate Results
     if (aiSummary) aiSummary.textContent = parsed.summary || 'Screening complete.';
     if (aiSeverity) {
       aiSeverity.textContent = parsed.severity || 'Normal';
-      aiSeverity.style.color = (parsed.severity === 'Normal' || parsed.severity === 'Very Mild') ? 'var(--turquoise)' : 'var(--amber)';
+      aiSeverity.style.color = severityColor(parsed.severity || 'Normal');
     }
-    if (aiCurrent) aiCurrent.textContent = parsed.current_issues || 'Alignment within normal ranges.';
-    if (aiFuture) aiFuture.textContent = parsed.future_risks || 'No significant progression risk identified.';
-
-    if (aiRecs) {
-      aiRecs.innerHTML = '';
-      (parsed.recommendations || []).forEach(r => {
-        const li = document.createElement('li');
-        li.textContent = r;
-        aiRecs.appendChild(li);
-      });
-    }
+    fillList(aiCauses, parsed.causes, 'Nothing in your measurements stands out.');
+    fillList(aiRisks, parsed.risks, 'Your risk looks low if you keep this posture.');
+    fillList(aiRecs, parsed.recommendations);
 
     lastAIData = {
-      metrics: latestMetrics,
+      metrics: scan,
       parsed,
       timestamp: new Date()
     };
@@ -2692,11 +2795,11 @@ async function runAIEvaluation(shoulderStability, headStability) {
       try {
         await window.supabaseClient.from('scans').insert({
           user_id: window.currentUser.id,
-          neck_deviation: latestMetrics.neckDeviationAngle != null ? parseFloat(latestMetrics.neckDeviationAngle.toFixed(2)) : null,
-          shoulder_tilt: latestMetrics.shoulderTilt != null ? parseFloat(latestMetrics.shoulderTilt.toFixed(2)) : null,
-          head_tilt: latestMetrics.headTilt != null ? parseFloat(latestMetrics.headTilt.toFixed(2)) : null,
-          shoulder_stability: parseFloat((shoulderStability / 100).toFixed(3)),
-          head_stability: parseFloat((headStability / 100).toFixed(3)),
+          neck_deviation: scan.neckDeviationAngle != null ? parseFloat(scan.neckDeviationAngle.toFixed(2)) : null,
+          shoulder_tilt: scan.shoulderTilt != null ? parseFloat(scan.shoulderTilt.toFixed(2)) : null,
+          head_tilt: scan.headTilt != null ? parseFloat(scan.headTilt.toFixed(2)) : null,
+          shoulder_stability: parseFloat(scan.shoulderStability.toFixed(3)),
+          head_stability: parseFloat(scan.headStability.toFixed(3)),
           severity: parsed.severity || 'Normal',
           ai_result: parsed
         });
@@ -2766,78 +2869,295 @@ async function fetchPlatformStats(userId = null) {
 window.fetchPlatformStats = fetchPlatformStats;
 fetchPlatformStats();
 
+const LEVEL_COLORS = ['#0D9488', '#D97706', '#DC2626'];
+const LEVEL_TEXT = ['#0F766E', '#B45309', '#B91C1C'];
+const STAB_WORDS = ['Steady', 'Slight sway', 'Noticeable sway', 'Unsteady'];
+
+function limitMetric(key, label, hint, view, limits, dec, unit) {
+  return {
+    key, label, hint, view, dec, unit,
+    max: limits[1] * 2,
+    get: s => s[key],
+    level: v => (v <= limits[0] ? 0 : v <= limits[1] ? 1 : 2),
+    bands: [[0, limits[0], 0], [limits[0], limits[1], 1], [limits[1], Infinity, 2]]
+  };
+}
+
+const PROGRESS_METRICS = [
+  {
+    key: 'score', label: 'Overall score', unit: '', dec: 0, max: 100, view: 'any scan',
+    hint: 'Higher is better. 100 is ideal posture.',
+    get: s => computePostureScore(s),
+    level: v => (v >= 75 ? 0 : v >= 58 ? 1 : 2),
+    bands: [[75, 100, 0], [58, 75, 1], [0, 58, 2]]
+  },
+  limitMetric('neck_deviation', 'Neck', 'Lower is better. 0° means your ear sits directly above your shoulder.', 'a side view', [5, 10], 1, '°'),
+  limitMetric('shoulder_tilt', 'Shoulder tilt', 'Lower is better. 0° means level shoulders.', 'a front view', [2, 4], 1, '°'),
+  limitMetric('head_tilt', 'Head tilt', 'Lower is better. 0° means your head sits level.', 'a front view', [2, 4], 1, '°'),
+  limitMetric('shoulder_stability', 'Shoulder steadiness', 'Lower is better. How much your shoulders drift during the 3-second hold.', 'any scan', [0.03, 0.06], 3, ''),
+  limitMetric('head_stability', 'Head steadiness', 'Lower is better. How much your head drifts during the 3-second hold.', 'any scan', [0.03, 0.06], 3, '')
+];
+
+let progressScans = [];
+let progressMetric = 'score';
+let progressPoints = [];
+
+function h(tag, cls, text) {
+  const el = document.createElement(tag);
+  if (cls) el.className = cls;
+  if (text != null) el.textContent = text;
+  return el;
+}
+
+const fmtDate = d => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+const fmtTime = d => d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+const fmtMetric = (m, v) => v.toFixed(m.dec) + m.unit;
+const stabWord = v => STAB_WORDS[v <= 0.03 ? 0 : v <= 0.06 ? 1 : v <= 0.10 ? 2 : 3];
+
+function scanView(s) {
+  if (s.neck_deviation != null) return 'Side view';
+  if (s.shoulder_tilt != null || s.head_tilt != null) return 'Front view';
+  return 'View unknown';
+}
+
+function scanSeverity(s) {
+  return s.severity || severityFor(computePostureScore(s));
+}
+
+function scanStreak(scans) {
+  const days = new Set(scans.map(s => new Date(s.created_at).toDateString()));
+  const d = new Date();
+  if (!days.has(d.toDateString())) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while (days.has(d.toDateString())) {
+    n++;
+    d.setDate(d.getDate() - 1);
+  }
+  return n;
+}
+
+function scanRow(s) {
+  const when = new Date(s.created_at);
+  const sev = scanSeverity(s);
+
+  const whenEl = h('div', 'scan-when');
+  whenEl.append(h('strong', null, fmtDate(when)), h('span', null, `${fmtTime(when)} · ${scanView(s)}`));
+
+  const badge = h('span', 'sev-badge', `${sev} · ${computePostureScore(s)}`);
+  badge.style.color = severityColor(sev);
+
+  const grid = h('div', 'scan-metrics');
+  PROGRESS_METRICS.slice(1).forEach(m => {
+    const raw = m.get(s);
+    const cell = h('div', 'sm');
+    cell.append(h('span', null, m.label));
+    if (raw == null) {
+      const dash = h('b', null, '–');
+      dash.title = 'Not measured in this view';
+      cell.append(dash);
+    } else {
+      const v = Number(raw);
+      const val = h('b', null, fmtMetric(m, v));
+      val.style.color = LEVEL_TEXT[m.level(v)];
+      cell.append(val);
+      if (m.key.endsWith('_stability')) cell.append(h('small', null, stabWord(v)));
+    }
+    grid.append(cell);
+  });
+
+  const row = h('div', 'scan-row');
+  row.append(whenEl, badge, grid);
+  return row;
+}
+
+function drawProgressChart() {
+  const canvas = document.getElementById('progressCanvas');
+  const wrap = document.getElementById('progressChartWrap');
+  const note = document.getElementById('progressMetricEmpty');
+  const m = PROGRESS_METRICS.find(x => x.key === progressMetric);
+  document.getElementById('progressChartHint').textContent = m.hint;
+
+  const pts = progressScans
+    .map(s => ({ s, v: m.get(s) }))
+    .filter(p => p.v != null && Number.isFinite(Number(p.v)))
+    .map(p => ({ s: p.s, v: Number(p.v) }));
+
+  progressPoints = [];
+  note.style.display = pts.length ? 'none' : 'block';
+  wrap.style.display = pts.length ? 'block' : 'none';
+  if (!pts.length) {
+    note.textContent = `No ${m.label.toLowerCase()} readings yet. This is measured in ${m.view}.`;
+    return;
+  }
+
+  const W = wrap.clientWidth;
+  const H = wrap.clientHeight;
+  if (!W) return;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(W * dpr);
+  canvas.height = Math.round(H * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  const L = 46, R = 18, T = 14, B = 44;
+  const plotW = W - L - R;
+  const plotH = H - T - B;
+  const yMax = m.key === 'score' ? 100 : Math.max(m.max, Math.max(...pts.map(p => p.v)) * 1.15);
+  const yOf = v => T + (1 - v / yMax) * plotH;
+  const n = pts.length;
+  const xOf = i => (n === 1 ? L + plotW / 2 : L + 20 + (i / (n - 1)) * (plotW - 40));
+
+  // Severity bands
+  m.bands.forEach(([lo, hi, lvl]) => {
+    const top = yOf(Math.min(hi, yMax));
+    ctx.fillStyle = LEVEL_COLORS[lvl] + '14';
+    ctx.fillRect(L, top, plotW, yOf(lo) - top);
+  });
+
+  // Gridlines and y labels
+  ctx.font = '11px "IBM Plex Mono", monospace';
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  const yDec = m.dec === 0 ? 0 : m.dec === 3 ? 2 : 1;
+  for (let i = 0; i <= 4; i++) {
+    const v = (yMax * i) / 4;
+    const y = yOf(v);
+    ctx.strokeStyle = '#E2E8F0';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(L, y);
+    ctx.lineTo(W - R, y);
+    ctx.stroke();
+    ctx.fillStyle = '#64748B';
+    ctx.fillText(v.toFixed(yDec), L - 8, y);
+  }
+
+  // Line
+  if (n > 1) {
+    ctx.strokeStyle = '#0D9488';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    pts.forEach((p, i) => (i ? ctx.lineTo(xOf(i), yOf(p.v)) : ctx.moveTo(xOf(i), yOf(p.v))));
+    ctx.stroke();
+  }
+
+  // Points
+  pts.forEach((p, i) => {
+    const x = xOf(i), y = yOf(p.v);
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = LEVEL_COLORS[m.level(p.v)];
+    ctx.fill();
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    progressPoints.push({ x, y, p });
+  });
+
+  // Date and time labels, newest first so the latest scan is always labelled
+  const step = Math.ceil(n / Math.max(1, Math.floor(plotW / 84)));
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = '#64748B';
+  for (let i = n - 1; i >= 0; i -= step) {
+    const d = new Date(pts[i].s.created_at);
+    ctx.fillText(d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), xOf(i), H - 24);
+    ctx.fillText(fmtTime(d), xOf(i), H - 10);
+  }
+}
+
+function renderProgress() {
+  const has = progressScans.length > 0;
+  document.getElementById('progressEmpty').style.display = has ? 'none' : 'block';
+  document.getElementById('progressBody').style.display = has ? 'block' : 'none';
+
+  document.getElementById('progTotalScans').textContent = progressScans.length;
+  const streak = scanStreak(progressScans);
+  document.getElementById('progStreak').textContent = `${streak} day${streak === 1 ? '' : 's'}`;
+  if (!has) return;
+
+  const latest = progressScans[progressScans.length - 1];
+  const latestSev = document.getElementById('progLatest');
+  latestSev.textContent = scanSeverity(latest);
+  latestSev.style.color = severityColor(scanSeverity(latest));
+  document.getElementById('progBestScore').textContent = Math.max(...progressScans.map(computePostureScore));
+
+  const chips = document.getElementById('progressChips');
+  if (!chips.children.length) {
+    PROGRESS_METRICS.forEach(m => {
+      const b = h('button', 'chip', m.label);
+      b.type = 'button';
+      b.dataset.metric = m.key;
+      chips.append(b);
+    });
+  }
+  chips.querySelectorAll('.chip').forEach(b => {
+    const on = b.dataset.metric === progressMetric;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-pressed', on);
+  });
+
+  drawProgressChart();
+  document.getElementById('progressList').replaceChildren(...progressScans.slice().reverse().map(scanRow));
+}
+
 async function loadProgressData() {
   if (!window.supabaseClient || !window.currentUser) return;
   try {
-    const { data: scans, error } = await window.supabaseClient
+    const { data, error } = await window.supabaseClient
       .from('scans')
       .select('*')
       .eq('user_id', window.currentUser.id)
       .order('created_at', { ascending: true });
-
-    if (error || !scans || scans.length === 0) {
-      const emptyEl = document.getElementById('progressEmpty');
-      const chartWrap = document.getElementById('progressChartWrap');
-      if (emptyEl) emptyEl.style.display = 'block';
-      if (chartWrap) chartWrap.style.display = 'none';
-      return;
-    }
-
-    const emptyEl = document.getElementById('progressEmpty');
-    const chartWrap = document.getElementById('progressChartWrap');
-    if (emptyEl) emptyEl.style.display = 'none';
-    if (chartWrap) chartWrap.style.display = 'block';
-
-    const progTotalScans = document.getElementById('progTotalScans');
-    const progBestScore = document.getElementById('progBestScore');
-    const progList = document.getElementById('progressList');
-
-    if (progTotalScans) progTotalScans.textContent = scans.length;
-
-    const neckAngles = scans.map(s => s.neck_deviation).filter(n => n != null);
-    if (progBestScore && neckAngles.length) {
-      progBestScore.textContent = `${Math.min(...neckAngles).toFixed(1)}°`;
-    }
-
-    if (progList) {
-      progList.innerHTML = '';
-      scans.slice(-6).reverse().forEach(s => {
-        const item = document.createElement('div');
-        item.className = 'history-item';
-        const dateStr = s.created_at ? new Date(s.created_at).toLocaleDateString() : 'Recent';
-        item.innerHTML = `
-          <span><strong>${dateStr}</strong> · Severity: ${s.severity || 'Normal'}</span>
-          <span style="font-family:var(--font-mono); color:var(--turquoise-dark);">Neck: ${s.neck_deviation != null ? s.neck_deviation + '°' : 'N/A'}</span>
-        `;
-        progList.appendChild(item);
-      });
-    }
-
-    // Render Canvas Trend Line
-    const pCanvas = document.getElementById('progressCanvas');
-    if (pCanvas) {
-      const pCtx = pCanvas.getContext('2d');
-      const W = pCanvas.width = 680;
-      const H = pCanvas.height = 240;
-      pCtx.clearRect(0, 0, W, H);
-
-      if (scans.length >= 2) {
-        const scores = scans.map(s => computePostureScore(s));
-        pCtx.strokeStyle = '#0D9488';
-        pCtx.lineWidth = 2.5;
-        pCtx.beginPath();
-        scores.forEach((sc, i) => {
-          const x = 30 + (i / (scores.length - 1)) * (W - 60);
-          const y = H - 20 - (sc / 100) * (H - 40);
-          if (i === 0) pCtx.moveTo(x, y);
-          else pCtx.lineTo(x, y);
-        });
-        pCtx.stroke();
-      }
-    }
-  } catch (err) {}
+    progressScans = error ? [] : (data || []);
+  } catch (err) {
+    progressScans = [];
+  }
+  renderProgress();
 }
 window.loadProgressData = loadProgressData;
+
+document.getElementById('progressChips').addEventListener('click', e => {
+  const b = e.target.closest('.chip');
+  if (!b) return;
+  progressMetric = b.dataset.metric;
+  renderProgress();
+});
+
+(function bindProgressChartHover() {
+  const canvas = document.getElementById('progressCanvas');
+  const tip = document.getElementById('progressTip');
+  const wrap = document.getElementById('progressChartWrap');
+
+  function show(e) {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    let best = null, bestD = 18 * 18;
+    for (const pt of progressPoints) {
+      const d = (pt.x - mx) ** 2 + (pt.y - my) ** 2;
+      if (d < bestD) { bestD = d; best = pt; }
+    }
+    if (!best) { tip.style.display = 'none'; return; }
+
+    const m = PROGRESS_METRICS.find(x => x.key === progressMetric);
+    const when = new Date(best.p.s.created_at);
+    tip.replaceChildren(
+      h('b', null, `${fmtDate(when)}, ${fmtTime(when)}`),
+      h('div', null, `${m.label}: ${fmtMetric(m, best.p.v)}`),
+      h('div', null, `Severity: ${scanSeverity(best.p.s)}`)
+    );
+    tip.style.display = 'block';
+    tip.style.left = Math.max(4, Math.min(best.x + 12, wrap.clientWidth - tip.offsetWidth - 4)) + 'px';
+    const above = best.y - tip.offsetHeight - 12;
+    tip.style.top = (above >= 0 ? above : best.y + 12) + 'px';
+  }
+
+  canvas.addEventListener('pointermove', show);
+  canvas.addEventListener('pointerdown', show);
+  canvas.addEventListener('pointerleave', () => { tip.style.display = 'none'; });
+  window.addEventListener('resize', () => { if (progressScans.length) drawProgressChart(); });
+})();
 
 /* ═══════════════════════════════════════════════════════════════════
    VERIFIED RESULT CARD & MODAL
@@ -2906,31 +3226,50 @@ const shareCanvas = document.getElementById('shareCardCanvas');
 const shareClose = document.getElementById('shareCardCloseBtn');
 let currentShareUrl = '';
 
+function openShareCard(metrics, parsed) {
+  const score = computePostureScore(metrics);
+  const id = 's_' + Math.random().toString(36).slice(2, 9);
+  currentShareUrl = `${window.location.origin}/#/r/${id}`;
+
+  const payload = {
+    id,
+    score,
+    severity: parsed?.severity || severityFor(score),
+    summary: parsed?.summary || 'Verified screening report.',
+    metrics
+  };
+
+  try {
+    localStorage.setItem('mediaspine_share_' + id, JSON.stringify(payload));
+  } catch (e) {}
+
+  if (window.supabaseClient) {
+    window.supabaseClient.from('shared_results').insert(payload).catch(()=>{});
+  }
+
+  renderResultCard(shareCanvas, payload);
+  if (shareOverlay) shareOverlay.classList.remove('hidden');
+}
+
 if (shareResultBtn) {
   shareResultBtn.addEventListener('click', () => {
-    if (!lastAIData) return;
-    const score = computePostureScore(lastAIData.metrics);
-    const id = 's_' + Math.random().toString(36).slice(2, 9);
-    currentShareUrl = `${window.location.origin}/#/r/${id}`;
+    if (lastAIData) openShareCard(lastAIData.metrics, lastAIData.parsed);
+  });
+}
 
-    const payload = {
-      id,
-      score,
-      severity: lastAIData.parsed?.severity || severityFor(score),
-      summary: lastAIData.parsed?.summary || 'Verified screening report.',
-      metrics: lastAIData.metrics
-    };
-
-    try {
-      localStorage.setItem('mediaspine_share_' + id, JSON.stringify(payload));
-    } catch (e) {}
-
-    if (window.supabaseClient) {
-      window.supabaseClient.from('shared_results').insert(payload).catch(()=>{});
-    }
-
-    renderResultCard(shareCanvas, payload);
-    if (shareOverlay) shareOverlay.classList.remove('hidden');
+const shareProgressBtn = document.getElementById('shareProgressBtn');
+if (shareProgressBtn) {
+  shareProgressBtn.addEventListener('click', () => {
+    const s = progressScans[progressScans.length - 1];
+    if (!s) return;
+    // Build the shared metrics explicitly so user_id and other row fields never reach the public card.
+    openShareCard({
+      neckDeviation: s.neck_deviation,
+      shoulderTilt: s.shoulder_tilt,
+      headTilt: s.head_tilt,
+      shoulderStability: s.shoulder_stability,
+      headStability: s.head_stability
+    }, s.ai_result);
   });
 }
 
