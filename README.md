@@ -2,19 +2,22 @@
 
 MediaSpine screens posture from a webcam. MediaPipe Pose tracks body landmarks in the browser, the page measures neck, shoulder and head alignment during a 3 second hold, and only the resulting numbers go to a language model, which writes a short assessment. It was built for the SpineSafe NGO platform, which works on reducing spinal strain in students.
 
+Repository: https://github.com/LaSserafim/mediaspine
 Live site: https://mediaspine.vercel.app
 
 MediaSpine is a screening aid, not a medical device. See [Disclaimer](#disclaimer).
 
 ## What it does
 
+- Interactive 2D WebGPU kinetic spine visual in the hero, responding to cursor movement without external images.
+- Interactive Biomechanical Cervical Load Graph plotting head tilt against spinal compressive load based on the Hansraj model.
 - Tracks pose landmarks from the webcam with MediaPipe Pose, in the browser.
 - Measures five values: neck deviation, shoulder tilt, head tilt, shoulder stability and head stability.
-- Asks an AI model for a summary, a severity level, current issues, future risks and three recommendations.
+- Asks an anti-slop clinical AI model for a summary, severity rating, current issues, future risks and three targeted exercises.
 - Converts the measurements into a 0 to 100 posture score and a shareable image card.
 - Saves each scan and draws a progress chart for signed-in users (Google sign-in through Supabase).
-- Shows total users, weekly active users and users active today on the landing page.
-- Emails the feedback form to the maintainers.
+- Transparent calibration field notes from SpineSafe NGO pilot trials and live community stats.
+- Direct feedback form connected to Gmail SMTP.
 
 ## How a scan works
 
@@ -78,7 +81,7 @@ AGENTS.md                       instructions for coding agents
 design-engineering-reasoning/   reference notes for coding agents
 ```
 
-The browser loads MediaPipe Pose 0.5.1675469404 and canvas-confetti 1.9.4 from jsDelivr, supabase-js from esm.sh, and the Fraunces, IBM Plex Mono and Inter fonts from Google Fonts. The server functions depend on `nodemailer` and `@supabase/supabase-js`. Vite is a dev dependency.
+The browser loads MediaPipe Pose 0.5.1675469404 and canvas-confetti 1.9.4 from jsDelivr, supabase-js from esm.sh, and the IBM Plex Mono and Inter fonts from Google Fonts. Client animations and 2D canvas visualization are powered by Three.js (WebGPU with WebGL2 fallback) and GSAP. The server functions depend on `nodemailer` and `@supabase/supabase-js`. Vite is a dev dependency.
 
 ## Endpoints
 
@@ -89,7 +92,7 @@ The browser loads MediaPipe Pose 0.5.1675469404 and canvas-confetti 1.9.4 from j
 | `/api/stats` | GET | Returns `totalUsers`, `activeWeekly` and `activeToday` from the `user_activity` table. |
 | `/api/feedback` | POST | Body `{ name, email, message, score }`. Only `message` is required. Sends an email through Gmail SMTP. |
 
-The model is told to return JSON with these keys: `summary` (at most 80 words), `severity`, `current_issues`, `future_risks` and `recommendations` (an array of exactly three strings).
+The model is told to return JSON with these keys: `summary` (at most 60 words), `severity`, `current_issues`, `future_risks` and `recommendations` (an array of exactly three strings). The prompt enforces strict anti-slop directives: no em dashes, no empty AI buzzwords, and direct citations of measured numbers and anatomical structures.
 
 ## Configuration
 
