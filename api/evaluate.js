@@ -4,8 +4,9 @@
 
 import { allow } from '../lib/rateLimit.js';
 
-// The exact string the client builds: one decimal on angles, three on variance, angle parts in any subset/order.
-const PAYLOAD_RE = /^(?:(?:Neck Deviation Angle|Shoulder Tilt|Head Tilt): \d{1,3}\.\d°, ){0,3}Shoulder Stability: \d\.\d{3} variance over hold window, Head Stability: \d\.\d{3} variance over hold window$/;
+// The exact string the client builds: angles with one decimal, tilts as a percent of frame height, stability as a three-decimal range of movement.
+// Angle and tilt parts are optional and appear in this order; stability parts are always last.
+const PAYLOAD_RE = /^(?:(?:Neck Deviation Angle: \d{1,3}\.\d°|(?:Shoulder|Head) Tilt: \d{1,3}\.\d% of frame height), ){0,3}Shoulder Stability: \d\.\d{3} range of movement over hold window, Head Stability: \d\.\d{3} range of movement over hold window$/;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -34,11 +35,12 @@ WRITING RULES
 1. Use plain everyday words and short sentences. Write for a 12 year old.
 2. No medical or anatomy terms. Say "neck muscles", "upper back", "shoulder blades". Never say "levator scapulae", "craniovertebral", "coronal", "sagittal", "variance" or similar.
 3. Talk to the reader as "you" and "your".
-4. Use at most one number per sentence, and say what it means, for example "your head leans 4 degrees to one side".
+4. Use at most one number per sentence, and say what it means, for example "your neck leans forward 12 degrees".
 5. Never use em dashes or double hyphens. Use commas or periods.
 6. No filler like "It is important to note", no sign-offs, no disclaimers, no rhetorical questions, no hype words. Do not scare the reader.
 7. Only talk about measurements you were given. A scan is either a side view (neck angle) or a front view (shoulder tilt and head tilt), so some measurements can be missing. Stability is always given.
 8. Before describing any measurement, check it against the reference ranges below. A head stability of 0.148 is unsteady, not steady. Never call a value "normal" or "steady" unless it falls in that range.
+9. Shoulder tilt and head tilt are given as a percent of the picture height. They are not degrees. Never call them degrees. Say things like "your shoulders sit a little uneven" instead of giving a unit.
 
 OUTPUT
 Return ONLY valid JSON. No markdown, no code block, no text outside the JSON. Exactly this schema:
@@ -68,9 +70,9 @@ Example: "Chin tuck: Sit tall and slide your chin straight back, like making a d
 
 REFERENCE RANGES
 Neck angle: 0-5 degrees Normal | 5-10 Very Mild | 10-15 Mild | 15-20 Moderate | 20+ Severe
-Shoulder tilt: 0-2 degrees Normal | 2-4 Mild | 4-7 Moderate | 7+ High
-Head tilt: 0-2 degrees Normal | 2-4 Mild | 4-7 Moderate | 7+ Severe
-Stability: lower is steadier. 0.03 or less is steady, up to 0.06 is slight sway, up to 0.10 is noticeable sway, above that is unsteady.`;
+Shoulder tilt: 0-2 percent of picture height Normal | 2-4 Mild | 4-7 Moderate | 7+ High
+Head tilt: 0-2 percent of picture height Normal | 2-4 Mild | 4-7 Moderate | 7+ Severe
+Stability is the range of movement. Lower is steadier. 0.03 or less is steady, up to 0.06 is slight sway, up to 0.10 is noticeable sway, above that is unsteady.`;
 
   let data;
   try {

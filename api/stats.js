@@ -31,16 +31,26 @@ export default async function handler(req, res) {
       auth: { persistSession: false, autoRefreshToken: false }
     });
 
-    const { data, error } = await supabase
-      .from('user_activity')
-      .select('user_id, activity_date');
+    // PostgREST caps a select at 1000 rows, so page through the whole table.
+    const PAGE = 1000;
+    const records = [];
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await supabase
+        .from('user_activity')
+        .select('user_id, activity_date')
+        .order('activity_date')
+        .order('user_id')
+        .range(from, from + PAGE - 1);
 
-    if (error) {
-      console.error('[Supabase user_activity error]', error);
-      return res.status(500).json({ error: 'Failed to query user activity data' });
+      if (error) {
+        console.error('[Supabase user_activity error]', error);
+        return res.status(500).json({ error: 'Failed to query user activity data' });
+      }
+
+      records.push(...data);
+      if (data.length < PAGE) break;
     }
 
-    const records = data || [];
     const now = new Date();
     const todayStr = now.toISOString().slice(0, 10);
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);

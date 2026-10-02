@@ -6,6 +6,10 @@
 <title>MediaSpine: Clinical AI Posture Screening</title>
 <meta name="description" content="Check your neck angle, shoulder tilt and posture steadiness with your webcam. Your video stays on your device. Free and open source, built for the SpineSafe NGO.">
 <meta name="theme-color" content="#0F766E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MediaSpine: posture screening with your webcam">
+<meta property="og:description" content="Check your neck angle, shoulder tilt and posture steadiness with your webcam. Your video stays on your device.">
+<meta name="twitter:card" content="summary">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,6 +48,10 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; scroll-padding-top: 88px; }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  .skip-link { position: absolute; left: -9999px; top: 8px; z-index: 1000; padding: 8px 14px; background: #0F172A; color: #FFFFFF; border-radius: 4px; font-size: 13px; }
+  .skip-link:focus { left: 8px; }
+  main:focus { outline: none; }
+  .result-note { margin-top: 16px; font-size: 12px; line-height: 1.5; color: var(--ink-soft); }
   body {
     background: var(--bg);
     color: var(--ink);
@@ -70,7 +78,7 @@
 
   .eyebrow {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--turquoise-dark);
@@ -347,7 +355,7 @@
     padding: 8px 12px;
     border-radius: 6px;
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.45;
     z-index: 20;
     opacity: 0;
@@ -369,7 +377,7 @@
   }
   .graph-caption span:last-child {
     font-family: var(--font-mono);
-    font-size: 11.5px;
+    font-size: 12px;
     color: var(--ink-soft);
   }
   .graph-controls {
@@ -402,7 +410,7 @@
     padding: 3px 8px;
     border-radius: 4px;
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     margin-top: 10px;
   }
@@ -429,6 +437,7 @@
     accent-color: var(--turquoise);
     cursor: pointer;
   }
+  .slider-input:focus-visible { outline: 2px solid var(--turquoise-dark); outline-offset: 4px; }
 
   .presets-row {
     display: flex;
@@ -439,7 +448,7 @@
   .preset-btn {
     padding: 6px 11px;
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     border: 1px solid var(--line);
     background: #FFFFFF;
     border-radius: 4px;
@@ -506,7 +515,7 @@
     top: 14px;
     left: 14px;
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     color: #FFFFFF;
     background: rgba(15, 23, 42, 0.75);
     padding: 5px 10px;
@@ -533,7 +542,7 @@
     top: 14px;
     right: 14px;
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     color: #FFFFFF;
     background: rgba(15, 23, 42, 0.75);
     padding: 5px 10px;
@@ -706,7 +715,7 @@
   .report-cell:last-child { border-right: none; }
   .report-cell h4 {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--ink-soft);
@@ -838,7 +847,7 @@
   .field label {
     display: block;
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--ink-soft);
@@ -906,7 +915,7 @@
   }
   .progress-stat-card .label {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     text-transform: uppercase;
     color: var(--ink-soft);
     margin-bottom: 4px;
@@ -1018,9 +1027,9 @@
     white-space: nowrap;
   }
   .scan-metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-  .scan-metrics .sm span { display: block; font-size: 11px; color: var(--ink-soft); }
+  .scan-metrics .sm span { display: block; font-size: 12px; color: var(--ink-soft); }
   .scan-metrics .sm b { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--ink-soft); }
-  .scan-metrics .sm small { display: block; font-size: 11px; color: var(--ink-soft); }
+  .scan-metrics .sm small { display: block; font-size: 12px; color: var(--ink-soft); }
   @media (max-width: 900px) {
     .scan-row {
       grid-template-columns: 1fr auto;
@@ -1111,7 +1120,7 @@
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 24px;
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
@@ -1120,6 +1129,7 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 
 <!-- Navigation -->
 <nav id="topNav">
@@ -1152,12 +1162,13 @@
       <div id="userMenu" style="display:none; align-items:center; gap:8px;">
         <img id="userAvatar" src="" alt="Avatar" style="display:none; width:22px; height:22px; border-radius:50%; border:1px solid var(--line); object-fit:cover;">
         <span id="userEmail" style="font-family:var(--font-mono); font-size:12px; color:var(--turquoise-dark); max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
-        <span id="userActiveBadge" style="display:none; font-family:var(--font-mono); font-size:10px; padding:2px 7px; border-radius:3px; background:var(--turquoise-pale); color:var(--turquoise-dark); font-weight:600;" title="Active user: at least one session in the past 7 days">● Active</span>
-        <button class="btn btn-ghost" onclick="window.signOutUser()" style="padding:5px 10px; font-size:11px;">Sign out</button>
+        <span id="userActiveBadge" style="display:none; font-family:var(--font-mono); font-size: 12px; padding:2px 7px; border-radius:3px; background:var(--turquoise-pale); color:var(--turquoise-dark); font-weight:600;" title="Active user: at least one session in the past 7 days">● Active</span>
+        <button class="btn btn-ghost" onclick="window.signOutUser()" style="padding:5px 10px; font-size: 12px;">Sign out</button>
       </div>
     </div>
   </div>
 </nav>
+<main id="main" tabindex="-1">
 
 <!-- Hero Section -->
 <header class="hero">
@@ -1234,7 +1245,7 @@
             <span>Adjust Forward Tilt Angle</span>
             <span id="sliderAngleDisplay">0°</span>
           </div>
-          <input type="range" min="0" max="60" value="0" step="1" class="slider-input" id="angleSlider">
+          <input type="range" min="0" max="60" value="0" step="1" class="slider-input" id="angleSlider" aria-label="Forward head tilt angle in degrees" aria-describedby="graphExplanation">
         </div>
 
         <div class="presets-row">
@@ -1267,7 +1278,7 @@
         <div class="cam-frame" id="camFrame">
           <div class="cam-badge">
             <span class="dot"></span>
-            <span id="camStatus">CAMERA OFF</span>
+            <span id="camStatus" role="status" aria-live="polite">CAMERA OFF</span>
           </div>
           <div class="view-mode-tag" id="viewModeBadge">Auto View Detect</div>
           
@@ -1279,13 +1290,13 @@
               <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
               <circle cx="12" cy="13" r="4"/>
             </svg>
-            <p id="camHint" style="margin-top:10px; padding:0 24px; max-width:420px; text-align:center; font-size:13px; line-height:1.5; font-family:var(--font-mono);">Click "Start camera" below</p>
+            <p id="camHint" aria-live="polite" style="margin-top:10px; padding:0 24px; max-width:420px; text-align:center; font-size:13px; line-height:1.5; font-family:var(--font-mono);">Click "Start camera" below</p>
           </div>
 
           <div class="countdown-overlay" id="countdownOverlay">
             <div class="countdown-inner">
               <div class="cd-num" id="countdownNum">3</div>
-              <div class="cd-label" id="countdownLabel">Hold still</div>
+              <div class="cd-label" id="countdownLabel" role="status" aria-live="polite">Hold still</div>
             </div>
           </div>
         </div>
@@ -1297,7 +1308,7 @@
           </div>
           <div class="quota-badge" id="quotaBadge">
             <span>Free daily evaluations:</span>
-            <strong id="quotaCount" style="color:var(--turquoise-dark); font-family:var(--font-mono);">5/5 remaining</strong>
+            <strong id="quotaCount" aria-live="polite" style="color:var(--turquoise-dark); font-family:var(--font-mono);">5/5 remaining</strong>
           </div>
         </div>
 
@@ -1334,12 +1345,12 @@
 
     <!-- AI Clinical Report Dashboard -->
     <div class="report" id="report">
-      <div class="ai-loading" id="aiLoading">
+      <div class="ai-loading" id="aiLoading" role="status">
         <div class="spinner"></div>
         <p>Analyzing posture measurements and calculating alignment…</p>
       </div>
 
-      <div id="aiResults" style="display:none;">
+      <div id="aiResults" tabindex="-1" style="display:none;">
         <div class="report-top">
           <div class="report-summary">
             <div class="eyebrow">Your result</div>
@@ -1365,6 +1376,8 @@
             <ol id="aiRecs"></ol>
           </div>
         </div>
+
+        <p class="result-note">Screening only. This is not a medical diagnosis. If you have pain, numbness, or headaches that keep coming back, see a doctor or physiotherapist.</p>
 
         <div class="report-actions" id="reportActions">
           <button class="btn btn-primary" id="shareResultBtn">Share score card</button>
@@ -1519,7 +1532,7 @@
         <div class="chart-header">
           <div>
             <h3>Your readings over time</h3>
-            <span id="progressChartHint" style="font-family:var(--font-mono); font-size:11px; color:var(--turquoise-dark);"></span>
+            <span id="progressChartHint" style="font-family:var(--font-mono); font-size: 12px; color:var(--turquoise-dark);"></span>
           </div>
           <button class="btn btn-ghost" id="shareProgressBtn" style="padding:6px 14px; font-size:12px;">Share latest result ↗</button>
         </div>
@@ -1535,7 +1548,7 @@
       </div>
 
       <div id="progressListWrap">
-        <h4 style="font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); margin-bottom:12px;">Scan record</h4>
+        <h4 style="font-family:var(--font-mono); font-size: 12px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); margin-bottom:12px;">Scan record</h4>
         <div class="scan-list-scroll"><div class="scan-list" id="progressList"></div></div>
       </div>
     </div>
@@ -1580,6 +1593,8 @@
   </div>
 </div>
 
+</main>
+
 <!-- Footer -->
 <footer>
   <div class="wrap foot-grid">
@@ -1611,11 +1626,7 @@
   window.gsap = gsap;
 
   // Three.js only draws the score-card ring, so it loads on first use instead of with the page.
-  window.loadThree = async () => {
-    if (window.THREE) return;
-    const { WebGLRenderer, Scene, OrthographicCamera, Mesh, MeshBasicMaterial, RingGeometry, CircleGeometry, BufferGeometry, DoubleSide } = await import('three');
-    window.THREE = { WebGLRenderer, Scene, OrthographicCamera, Mesh, MeshBasicMaterial, RingGeometry, CircleGeometry, BufferGeometry, DoubleSide };
-  };
+  window.loadThree = async () => {};
 
   // Supabase Client Setup
   const SUPABASE_URL = 'https://wbnvjyfiegjsogvopyhz.supabase.co';
@@ -1628,6 +1639,7 @@
     const el = document.createElement('div');
     el.textContent = msg;
     el.style.cssText = 'position:fixed; bottom:24px; right:24px; z-index:999; padding:12px 18px; border-radius:6px; background:#0F172A; color:#FFFFFF; font-size:13px; font-family:var(--font-mono); box-shadow:0 4px 16px rgba(0,0,0,0.2);';
+    el.setAttribute('role', 'status');
     document.body.appendChild(el);
     setTimeout(() => { el.remove(); }, 3500);
   };
@@ -2265,17 +2277,24 @@ function extractPoseMetrics(lm) {
   return metrics;
 }
 
+const median = (a) => {
+  if (!a.length) return null;
+  const s = [...a].sort((x, y) => x - y);
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+};
+
 /* ═══════════════════════════════════════════════════════════════════
    STATE & DOM CACHE
 ═══════════════════════════════════════════════════════════════════ */
 let isProcessing    = false;
 let cameraStream    = null;
 let animFrameId     = null;
-let latestMetrics   = null;
 let currentLandmarks = null;
 let isRecording     = false;
 let snapshotTimer   = null;
 let poseFailures    = 0;
+let evaluating      = false;
 let lastAIData      = null;
 
 const prevTextCache = {};
@@ -2290,6 +2309,9 @@ function setText(el, text) {
 let shoulderYData = [];
 let noseXData     = [];
 let noseYData     = [];
+let neckData          = [];
+let shoulderTiltData  = [];
+let headTiltData      = [];
 
 const rollingShoulderY = [];
 const rollingNoseX     = [];
@@ -2310,7 +2332,7 @@ function getTodayKey() {
 function getRemainingEvals() {
   try {
     const key = getTodayKey();
-    const count = parseInt(localStorage.getItem(key) || '0', 10);
+    const count = parseInt(localStorage.getItem(key) || '0', 10) || 0;
     return Math.max(0, DAILY_EVAL_LIMIT - count);
   } catch (e) {
     return DAILY_EVAL_LIMIT;
@@ -2320,7 +2342,7 @@ function getRemainingEvals() {
 function consumeEvalQuota() {
   try {
     const key = getTodayKey();
-    const count = parseInt(localStorage.getItem(key) || '0', 10);
+    const count = parseInt(localStorage.getItem(key) || '0', 10) || 0;
     localStorage.setItem(key, String(count + 1));
   } catch (e) {}
   updateQuotaDisplay();
@@ -2358,7 +2380,6 @@ if (typeof Pose !== 'undefined') {
     if (!cameraStream) return;
     if (results.poseLandmarks) {
       const metrics = extractPoseMetrics(results.poseLandmarks);
-      latestMetrics = metrics;
       updateUI(metrics);
     } else {
       updateUI({ poseDetected: false });
@@ -2415,7 +2436,7 @@ function updateUI(metrics) {
       }
     }
 
-    if (snapshotBtn && snapshotBtn.disabled && !isRecording) {
+    if (snapshotBtn && snapshotBtn.disabled && !isRecording && !evaluating) {
       snapshotBtn.disabled = false;
     }
 
@@ -2425,6 +2446,9 @@ function updateUI(metrics) {
         noseXData.push(lm[0].x);
         noseYData.push(lm[0].y);
       }
+      if (metrics.neckDeviationAngle != null) neckData.push(metrics.neckDeviationAngle);
+      if (metrics.shoulderTilt != null) shoulderTiltData.push(metrics.shoulderTilt);
+      if (metrics.headTilt != null) headTiltData.push(metrics.headTilt);
     }
 
     // Side metric displays
@@ -2437,7 +2461,7 @@ function updateUI(metrics) {
     }
 
     if (metrics.shoulderTilt != null) {
-      setText(mShoulder, `${metrics.shoulderTilt.toFixed(1)}°`);
+      setText(mShoulder, `${metrics.shoulderTilt.toFixed(1)}%`);
       mShoulder.className = 'val ' + (metrics.shoulderTilt <= 2 ? 'good' : metrics.shoulderTilt <= 4 ? 'caution' : 'bad');
     } else {
       setText(mShoulder, '- (Profile)');
@@ -2445,7 +2469,7 @@ function updateUI(metrics) {
     }
 
     if (metrics.headTilt != null) {
-      setText(mHead, `${metrics.headTilt.toFixed(1)}°`);
+      setText(mHead, `${metrics.headTilt.toFixed(1)}%`);
       mHead.className = 'val ' + (metrics.headTilt <= 2 ? 'good' : metrics.headTilt <= 4 ? 'caution' : 'bad');
     } else {
       setText(mHead, '- (Profile)');
@@ -2469,8 +2493,8 @@ function updateUI(metrics) {
         const sMax = Math.max(...rollingShoulderY);
         const sMin = Math.min(...rollingShoulderY);
         const liveShoulderStab = (sMax - sMin) * 100;
-        setText(mShoulderStab, `${(liveShoulderStab / 100).toFixed(2)} var`);
-        mShoulderStab.className = 'val ' + (liveShoulderStab < 2.0 ? 'good' : liveShoulderStab < 4.5 ? 'caution' : 'bad');
+        setText(mShoulderStab, `${(liveShoulderStab / 100).toFixed(2)} range`);
+        mShoulderStab.className = 'val ' + (liveShoulderStab < 3.0 ? 'good' : liveShoulderStab < 6.0 ? 'caution' : 'bad');
       } else {
         setText(mShoulderStab, 'Calibrating...');
         mShoulderStab.className = 'val';
@@ -2480,8 +2504,8 @@ function updateUI(metrics) {
         const nxMax = Math.max(...rollingNoseX), nxMin = Math.min(...rollingNoseX);
         const nyMax = Math.max(...rollingNoseY), nyMin = Math.min(...rollingNoseY);
         const liveHeadStab = Math.max(nxMax - nxMin, nyMax - nyMin) * 100;
-        setText(mHeadStab, `${(liveHeadStab / 100).toFixed(2)} var`);
-        mHeadStab.className = 'val ' + (liveHeadStab < 2.0 ? 'good' : liveHeadStab < 4.5 ? 'caution' : 'bad');
+        setText(mHeadStab, `${(liveHeadStab / 100).toFixed(2)} range`);
+        mHeadStab.className = 'val ' + (liveHeadStab < 3.0 ? 'good' : liveHeadStab < 6.0 ? 'caution' : 'bad');
       } else {
         setText(mHeadStab, 'Calibrating...');
         mHeadStab.className = 'val';
@@ -2544,7 +2568,9 @@ async function startCamera() {
       showCameraProblem('CameraLost');
     });
     if (camStatus) camStatus.textContent = 'LOADING MODEL';
+    if (camHint) camHint.textContent = 'Downloading the posture model (about 6 MB, first time only)…';
     try { await pose.initialize(); } catch (e) { throw Object.assign(new Error('Pose model failed to load'), { name: 'PoseUnavailable' }); }
+    if (!cameraStream) return;
 
     document.body.classList.add('cam-active');
     if (camStatus) camStatus.textContent = 'LIVE SCREENING';
@@ -2574,7 +2600,6 @@ function stopCamera() {
   isProcessing = false;
   poseFailures = 0;
   currentLandmarks = null;
-  latestMetrics = null;
   if (countdownOverlay) countdownOverlay.classList.remove('active');
   if (canvas && ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (camHint) camHint.textContent = CAM_HINT_DEFAULT;
@@ -2598,12 +2623,16 @@ function stopCamera() {
 
 if (startBtn) startBtn.onclick = startCamera;
 
+// Release the camera when the tab is hidden or the page is left, so the camera light never stays on in the background.
+document.addEventListener('visibilitychange', () => { if (document.hidden && cameraStream) stopCamera(); });
+window.addEventListener('pagehide', () => { if (cameraStream) stopCamera(); });
+
 /* ═══════════════════════════════════════════════════════════════════
    3-SECOND STABILITY SNAPSHOT
 ═══════════════════════════════════════════════════════════════════ */
 if (snapshotBtn) {
   snapshotBtn.addEventListener('click', () => {
-    if (!currentLandmarks || isRecording) return;
+    if (!currentLandmarks || isRecording || evaluating) return;
     const remaining = getRemainingEvals();
     if (remaining <= 0) {
       if (limitNotice) limitNotice.classList.add('show');
@@ -2614,11 +2643,14 @@ if (snapshotBtn) {
 }
 
 function startStabilitySnapshot() {
-  if (!currentLandmarks || isRecording) return;
+  if (!currentLandmarks || isRecording || evaluating) return;
   isRecording = true;
   shoulderYData = [];
   noseXData     = [];
   noseYData     = [];
+  neckData          = [];
+  shoulderTiltData  = [];
+  headTiltData      = [];
 
   snapshotBtn.disabled = true;
   let count = 3;
@@ -2636,7 +2668,7 @@ function startStabilitySnapshot() {
       setText(countdownNum, '✓');
       setText(countdownLabel, 'Analyzing');
       isRecording = false;
-      if (shoulderYData.length < MIN_STABILITY_SAMPLES || noseXData.length < MIN_STABILITY_SAMPLES) {
+      if (shoulderYData.length < MIN_STABILITY_SAMPLES || noseXData.length < MIN_STABILITY_SAMPLES || !(neckData.length + shoulderTiltData.length + headTiltData.length)) {
         setText(countdownNum, '!');
         setText(countdownLabel, 'Pose lost. Try again');
         setTimeout(() => { if (countdownOverlay) countdownOverlay.classList.remove('active'); }, 1800);
@@ -2653,8 +2685,8 @@ function startStabilitySnapshot() {
       const nyMin = noseYData.length ? Math.min(...noseYData) : 0;
       const headStability = Math.max(nxMax - nxMin, nyMax - nyMin) * 100;
 
-      setText(mShoulderStab, `${(shoulderStability / 100).toFixed(2)} var`);
-      setText(mHeadStab, `${(headStability / 100).toFixed(2)} var`);
+      setText(mShoulderStab, `${(shoulderStability / 100).toFixed(2)} range`);
+      setText(mHeadStab, `${(headStability / 100).toFixed(2)} range`);
 
       runAIEvaluation(shoulderStability, headStability);
       setTimeout(() => {
@@ -2722,8 +2754,6 @@ function severityFor(score) {
 /* ═══════════════════════════════════════════════════════════════════
    DEEPSEEK AI EVALUATION CLIENT
 ═══════════════════════════════════════════════════════════════════ */
-const SEVERITIES = ['Normal', 'Very Mild', 'Mild', 'Moderate', 'Moderately Severe', 'Severe'];
-
 function severityColor(label) {
   if (label === 'Normal' || label === 'Very Mild') return '#0F766E';
   if (label === 'Mild' || label === 'Moderate') return '#B45309';
@@ -2742,12 +2772,14 @@ function fillList(el, items, fallback) {
 }
 
 async function runAIEvaluation(shoulderStability, headStability) {
-  if (!latestMetrics) return;
+  evaluating = true;
 
-  // latestMetrics changes on every camera frame; freeze what is being evaluated and saved.
-  // Stability is stored as variance (range of movement), the unit the scoring thresholds use.
+  // Angles are the median over the 3 s hold, so one noisy frame cannot move the score.
+  // Stability is the range of movement (max minus min) over the hold. Tilt is a percent of picture height.
   const scan = {
-    ...latestMetrics,
+    neckDeviationAngle: median(neckData),
+    shoulderTilt: median(shoulderTiltData),
+    headTilt: median(headTiltData),
     shoulderStability: shoulderStability / 100,
     headStability: headStability / 100
   };
@@ -2757,13 +2789,13 @@ async function runAIEvaluation(shoulderStability, headStability) {
     parts.push(`Neck Deviation Angle: ${scan.neckDeviationAngle.toFixed(1)}°`);
   }
   if (scan.shoulderTilt != null) {
-    parts.push(`Shoulder Tilt: ${scan.shoulderTilt.toFixed(1)}°`);
+    parts.push(`Shoulder Tilt: ${scan.shoulderTilt.toFixed(1)}% of frame height`);
   }
   if (scan.headTilt != null) {
-    parts.push(`Head Tilt: ${scan.headTilt.toFixed(1)}°`);
+    parts.push(`Head Tilt: ${scan.headTilt.toFixed(1)}% of frame height`);
   }
-  parts.push(`Shoulder Stability: ${scan.shoulderStability.toFixed(3)} variance over hold window`);
-  parts.push(`Head Stability: ${scan.headStability.toFixed(3)} variance over hold window`);
+  parts.push(`Shoulder Stability: ${scan.shoulderStability.toFixed(3)} range of movement over hold window`);
+  parts.push(`Head Stability: ${scan.headStability.toFixed(3)} range of movement over hold window`);
 
   const payloadString = parts.join(', ');
 
@@ -2779,18 +2811,30 @@ async function runAIEvaluation(shoulderStability, headStability) {
     });
 
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ error: 'Evaluation failed' }));
-      throw new Error(err.error || `HTTP ${res.status}`);
+      const err = await res.json().catch(() => ({}));
+      // A 500 carries server setup text that means nothing to the reader.
+      throw new Error(res.status === 500 ? 'The evaluation service is unavailable. Please try again later.' : (err.error || `HTTP ${res.status}`));
     }
 
     const data = await res.json();
-    let parsed = null;
-    try { parsed = JSON.parse(data.choices?.[0]?.message?.content); } catch (e) { parsed = null; }
-    if (!parsed || typeof parsed.summary !== 'string' || !SEVERITIES.includes(parsed.severity)) {
+    let raw = null;
+    try { raw = JSON.parse(data.choices?.[0]?.message?.content); } catch (e) { raw = null; }
+    if (!raw || typeof raw.summary !== 'string') {
       throw new Error('The evaluation came back in an unexpected format. Please try again.');
     }
 
     consumeEvalQuota();
+
+    // One cleaned object feeds the screen, the share card, the CSV and the saved row.
+    // Severity comes from the same score the history and share card show, so the label can never disagree with the number.
+    const list = (v) => (Array.isArray(v) ? v : []).filter(t => typeof t === 'string').slice(0, 6);
+    const parsed = {
+      summary: raw.summary.slice(0, 600),
+      severity: severityFor(computePostureScore(scan)),
+      causes: list(raw.causes),
+      risks: list(raw.risks),
+      recommendations: list(raw.recommendations)
+    };
 
     // Map scan to interactive biomechanical graph
     if (scan.neckDeviationAngle != null && window.updateBiomechanicalGraphScan) {
@@ -2798,10 +2842,13 @@ async function runAIEvaluation(shoulderStability, headStability) {
     }
 
     // Populate Results
-    if (aiSummary) aiSummary.textContent = parsed.summary || 'Screening complete.';
+    if (aiSummary) {
+      aiSummary.textContent = parsed.summary || 'Screening complete.';
+      aiSummary.removeAttribute('role');
+    }
     if (aiSeverity) {
-      aiSeverity.textContent = parsed.severity || 'Normal';
-      aiSeverity.style.color = severityColor(parsed.severity || 'Normal');
+      aiSeverity.textContent = parsed.severity;
+      aiSeverity.style.color = severityColor(parsed.severity);
     }
     fillList(aiCauses, parsed.causes, 'Nothing in your measurements stands out.');
     fillList(aiRisks, parsed.risks, 'Your risk looks low if you keep this posture.');
@@ -2814,31 +2861,42 @@ async function runAIEvaluation(shoulderStability, headStability) {
     };
 
     if (aiLoading) aiLoading.style.display = 'none';
-    if (aiResults) aiResults.style.display = 'block';
+    if (aiResults) {
+      aiResults.style.display = 'block';
+      aiResults.focus({ preventScroll: true });
+      aiResults.scrollIntoView({ block: 'nearest' });
+    }
     if (reportActions) reportActions.style.display = '';
 
     // Save scan to Supabase if logged in
     if (window.supabaseClient && window.currentUser) {
       try {
-        await window.supabaseClient.from('scans').insert({
+        const { error: saveError } = await window.supabaseClient.from('scans').insert({
           user_id: window.currentUser.id,
           neck_deviation: scan.neckDeviationAngle != null ? parseFloat(scan.neckDeviationAngle.toFixed(2)) : null,
           shoulder_tilt: scan.shoulderTilt != null ? parseFloat(scan.shoulderTilt.toFixed(2)) : null,
           head_tilt: scan.headTilt != null ? parseFloat(scan.headTilt.toFixed(2)) : null,
           shoulder_stability: parseFloat(scan.shoulderStability.toFixed(3)),
           head_stability: parseFloat(scan.headStability.toFixed(3)),
-          severity: parsed.severity || 'Normal',
+          severity: parsed.severity,
           ai_result: parsed
         });
+        if (saveError) throw saveError;
         if (typeof window.loadProgressData === 'function') {
           window.loadProgressData();
         }
-      } catch (saveErr) {}
+      } catch (saveErr) {
+        console.error('Scan save failed:', saveErr);
+        window.showAuthToast?.('Your result is shown, but it could not be saved to your history.');
+      }
     }
   } catch (err) {
     if (aiLoading) aiLoading.style.display = 'none';
     if (aiResults) aiResults.style.display = 'block';
-    if (aiSummary) aiSummary.textContent = err instanceof TypeError ? 'No connection. Check your internet and try again.' : 'Notice: ' + err.message;
+    if (aiSummary) {
+      aiSummary.textContent = err instanceof TypeError ? 'No connection. Check your internet and try again.' : 'Notice: ' + err.message;
+      aiSummary.setAttribute('role', 'alert');
+    }
     if (aiSeverity) aiSeverity.textContent = '';
     fillList(aiCauses, []);
     fillList(aiRisks, []);
@@ -2846,7 +2904,8 @@ async function runAIEvaluation(shoulderStability, headStability) {
     lastAIData = null;
     if (reportActions) reportActions.style.display = 'none';
   } finally {
-    if (snapshotBtn) snapshotBtn.disabled = false;
+    evaluating = false;
+    if (snapshotBtn) snapshotBtn.disabled = !currentLandmarks;
   }
 }
 
@@ -2873,11 +2932,14 @@ if (fbForm) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim(), email: email.trim(), message: message.trim() })
       });
-      if (!res.ok) throw new Error('Feedback service unavailable');
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(res.status >= 500 ? 'Feedback service unavailable. Please try again later.' : (err.error || 'Feedback service unavailable'));
+      }
       fbForm.style.display = 'none';
       if (fbSuccess) fbSuccess.classList.add('show');
     } catch (err) {
-      alert('Failed to send feedback: ' + err.message);
+      window.showAuthToast?.(err instanceof TypeError ? 'No connection. Check your internet and try again.' : err.message);
       if (btn) { btn.disabled = false; btn.textContent = 'Send feedback →'; }
     }
   });
@@ -2925,8 +2987,8 @@ const PROGRESS_METRICS = [
     bands: [[75, 100, 0], [58, 75, 1], [0, 58, 2]]
   },
   limitMetric('neck_deviation', 'Neck', 'Lower is better. 0° means your ear sits directly above your shoulder.', 'a side view', [5, 10], 1, '°'),
-  limitMetric('shoulder_tilt', 'Shoulder tilt', 'Lower is better. 0° means level shoulders.', 'a front view', [2, 4], 1, '°'),
-  limitMetric('head_tilt', 'Head tilt', 'Lower is better. 0° means your head sits level.', 'a front view', [2, 4], 1, '°'),
+  limitMetric('shoulder_tilt', 'Shoulder tilt', 'Lower is better. 0% means level shoulders. Shown as percent of picture height.', 'a front view', [2, 4], 1, '%'),
+  limitMetric('head_tilt', 'Head tilt', 'Lower is better. 0% means your head sits level. Shown as percent of picture height.', 'a front view', [2, 4], 1, '%'),
   limitMetric('shoulder_stability', 'Shoulder steadiness', 'Lower is better. How much your shoulders drift during the 3-second hold.', 'any scan', [0.03, 0.06], 3, ''),
   limitMetric('head_stability', 'Head steadiness', 'Lower is better. How much your head drifts during the 3-second hold.', 'any scan', [0.03, 0.06], 3, '')
 ];
@@ -3142,13 +3204,25 @@ function renderProgress() {
 
 async function loadProgressData() {
   if (!window.supabaseClient || !window.currentUser) return;
+  const safeAiResult = (raw) => {
+    if (!raw || typeof raw !== 'object') return null;
+    const list = (v) => (Array.isArray(v) ? v : []).filter(t => typeof t === 'string').slice(0, 6);
+    return {
+      summary: typeof raw.summary === 'string' ? raw.summary.slice(0, 600) : '',
+      severity: typeof raw.severity === 'string' ? raw.severity : '',
+      causes: list(raw.causes),
+      risks: list(raw.risks),
+      recommendations: list(raw.recommendations)
+    };
+  };
   try {
     const { data, error } = await window.supabaseClient
       .from('scans')
       .select('*')
       .eq('user_id', window.currentUser.id)
-      .order('created_at', { ascending: true });
-    progressScans = error ? [] : (data || []);
+      .order('created_at', { ascending: true })
+      .limit(200);
+    progressScans = error ? [] : (data || []).map(s => ({ ...s, ai_result: safeAiResult(s.ai_result) }));
   } catch (err) {
     progressScans = [];
   }
@@ -3206,7 +3280,7 @@ const CARD_MONO = '"IBM Plex Mono", ui-monospace, monospace';
 const CARD_FINAL = { ring: 1, text: 1, rows: 1 };
 const cardClamp = x => Math.max(0, Math.min(1, x));
 
-const loadRing3d = () => (window.loadThree ? window.loadThree().catch(() => {}) : Promise.resolve());
+const loadRing3d = () => Promise.resolve();
 
 function loadCardFonts() {
   if (!document.fonts) return Promise.resolve();
@@ -3260,42 +3334,33 @@ function wrapLines(ctx, text, maxW, maxLines) {
   return lines;
 }
 
-// Flat 2D score ring drawn with Three.js (orthographic camera, no depth). Falls back to canvas arcs without WebGL.
-let ringGL;
+// Pure 2D score ring — no WebGL dependency.
 function ringImage(progress, color) {
-  const T = window.THREE;
-  if (ringGL === false || !T) return null;
-  if (ringGL && ringGL.renderer.getContext().isContextLost()) { ringGL.renderer.dispose(); ringGL = undefined; }
   try {
-    if (!ringGL) {
-      const renderer = new T.WebGLRenderer({ alpha: true, antialias: true });
-      renderer.setPixelRatio(2);
-      renderer.setSize(460, 460, false);
-      const camera = new T.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
-      camera.position.z = 5;
-      const flat = c => new T.MeshBasicMaterial({ color: c, side: T.DoubleSide });
-      const track = new T.Mesh(new T.RingGeometry(0.74, 0.88, 128), flat('#E2E8F0'));
-      const arc = new T.Mesh(new T.BufferGeometry(), flat('#0D9488'));
-      const cap = new T.CircleGeometry(0.07, 32);
-      const capStart = new T.Mesh(cap, arc.material);
-      const capEnd = new T.Mesh(cap, arc.material);
-      const scene = new T.Scene();
-      scene.add(track, arc, capStart, capEnd);
-      ringGL = { renderer, scene, camera, arc, capStart, capEnd };
+    const size = 460;
+    const out = document.createElement('canvas');
+    out.width = size;
+    out.height = size;
+    const ctx = out.getContext('2d');
+    const cx = size / 2, cy = size / 2;
+    const inner = 0.74 * cx, outer = 0.88 * cx;
+    const mid = (inner + outer) / 2;
+    const lw = outer - inner;
+    ctx.strokeStyle = '#E2E8F0';
+    ctx.lineWidth = lw;
+    ctx.beginPath();
+    ctx.arc(cx, cy, mid, 0, Math.PI * 2);
+    ctx.stroke();
+    if (progress > 0.002) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = lw;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(cx, cy, mid, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
+      ctx.stroke();
     }
-    const { renderer, scene, camera, arc, capStart, capEnd } = ringGL;
-    const theta = Math.PI * 2 * progress;
-    const end = Math.PI / 2 - theta;
-    arc.geometry.dispose();
-    arc.geometry = new T.RingGeometry(0.74, 0.88, Math.max(2, Math.ceil(128 * progress)), 1, end, theta);
-    arc.material.color.set(color);
-    arc.visible = capStart.visible = capEnd.visible = progress > 0.002;
-    capStart.position.set(0, 0.81, 0);
-    capEnd.position.set(0.81 * Math.cos(end), 0.81 * Math.sin(end), 0);
-    renderer.render(scene, camera);
-    return renderer.domElement;
+    return out;
   } catch (e) {
-    ringGL = false;
     return null;
   }
 }
@@ -3665,16 +3730,24 @@ if (csvBtn) {
     if (!lastAIData) return;
     const m = lastAIData.metrics;
     const p = lastAIData.parsed;
-    const csvContent = "data:text/csv;charset=utf-8," +
-      "Timestamp,Neck Deviation,Shoulder Tilt,Head Tilt,Severity,Summary\n" +
-      `"${new Date().toISOString()}","${m.neckDeviationAngle || 'N/A'}","${m.shoulderTilt || 'N/A'}","${m.headTilt || 'N/A'}","${p.severity || 'Normal'}","${(p.summary || '').replace(/"/g, '""')}"`;
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "mediaspine_posture_report.csv");
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    const row = [
+      new Date().toISOString(),
+      m.neckDeviationAngle != null ? m.neckDeviationAngle.toFixed(1) : '',
+      m.shoulderTilt != null ? m.shoulderTilt.toFixed(1) : '',
+      m.headTilt != null ? m.headTilt.toFixed(1) : '',
+      m.shoulderStability != null ? m.shoulderStability.toFixed(3) : '',
+      m.headStability != null ? m.headStability.toFixed(3) : '',
+      p.severity || '',
+      (p.summary || '').replace(/"/g, '""')
+    ].map(v => `"${v}"`).join(',');
+    const csv = 'Timestamp,Neck Deviation (°),Shoulder Tilt (%),Head Tilt (%),Shoulder Stability,Head Stability,Severity,Summary\n' + row;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mediaspine_posture_report.csv';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
 }
 
@@ -3694,7 +3767,8 @@ async function handleSharedRoute() {
 
   if (hash.startsWith('#/r/')) {
     const id = hash.slice(4).split('?')[0].trim();
-    if (!id) return;
+    const validId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    if (!id || !validId) return;
     if (cameraStream) stopCamera();
 
     mainElements.forEach(el => el.style.display = 'none');

@@ -9,7 +9,6 @@ MediaSpine is a screening aid, not a medical device. See [Disclaimer](#disclaime
 
 ## What it does
 
-- Interactive 2D WebGPU kinetic spine visual in the hero, responding to cursor movement without external images.
 - Interactive Biomechanical Cervical Load Graph plotting head tilt against spinal compressive load based on the Hansraj model.
 - Tracks pose landmarks from the webcam with MediaPipe Pose, in the browser.
 - Measures five values: neck deviation, shoulder tilt, head tilt, shoulder stability and head stability.
@@ -24,8 +23,8 @@ MediaSpine is a screening aid, not a medical device. See [Disclaimer](#disclaime
 1. Camera. The page requests the front camera at an ideal 480x360. Pose runs at model complexity 0 (the lightest), with landmark smoothing on and segmentation off. Only one frame is processed at a time, and frames that arrive while the model is busy are skipped.
 2. View detection. If the horizontal distance between the two shoulder landmarks is below 0.15 (normalized units), the scan counts as a profile view. Otherwise it counts as a frontal view.
 3. Profile view. Neck deviation is the angle `atan(|ear.x - shoulder.x| / |ear.y - shoulder.y|)` in degrees. The page uses whichever side has the higher combined ear and shoulder visibility.
-4. Frontal view. Shoulder tilt is `|left shoulder.y - right shoulder.y| * 100`. Head tilt is `|left eye.y - right eye.y| * 100`. These are percentages of frame height. The AI prompt calls them degrees.
-5. Snapshot. "Take snapshot & AI evaluation" starts a 3 second countdown and records shoulder height and nose position on every processed frame. Shoulder stability is the range of shoulder height times 100. Head stability is the larger of the nose's horizontal and vertical ranges times 100. A higher number means less steady.
+4. Frontal view. Shoulder tilt is `|left shoulder.y - right shoulder.y| * 100`. Head tilt is `|left eye.y - right eye.y| * 100`. These are percentages of picture height, not degrees, and the AI prompt says so.
+5. Snapshot. "Take snapshot & AI evaluation" starts a 3 second countdown and records shoulder height and nose position on every processed frame. Stability is a range of movement, not a variance. Shoulder stability is the range (max minus min) of shoulder height times 100. Head stability is the larger of the nose's horizontal and vertical ranges times 100. A higher number means less steady. A hold that collects fewer than 20 samples is discarded and sends nothing.
 6. Evaluation. The browser sends the metrics as a text string to `/api/evaluate`. The function adds the system prompt and forwards the request to DeepSeek.
 7. Result. The page renders the response. If the user is signed in, it also saves the scan.
 
@@ -60,7 +59,7 @@ The reference ranges written into the AI prompt:
 | Metric | Normal | Very Mild | Mild | Moderate | Severe (High for shoulder tilt) |
 |---|---|---|---|---|---|
 | Neck deviation | 0 to 5 | 5 to 10 | 10 to 15 | 15 to 20 | over 20 |
-| Shoulder tilt, head tilt | 0 to 2 | not used | 2 to 4 | 4 to 7 | over 7 |
+| Shoulder tilt, head tilt (percent of picture height) | 0 to 2 | not used | 2 to 4 | 4 to 7 | over 7 |
 
 ## Project layout
 
@@ -81,7 +80,7 @@ AGENTS.md                       instructions for coding agents
 design-engineering-reasoning/   reference notes for coding agents
 ```
 
-The browser loads MediaPipe Pose 0.5.1675469404 from jsDelivr (the script tag carries a subresource integrity hash) and the IBM Plex Mono and Inter fonts from Google Fonts. supabase-js, GSAP and Three.js are bundled by Vite, and Three.js loads only when a score card opens. The server functions depend on `nodemailer` and `@supabase/supabase-js`. Vite is a dev dependency.
+The browser loads MediaPipe Pose 0.5.1675469404 from jsDelivr (the script tag carries a subresource integrity hash) and the IBM Plex Mono and Inter fonts from Google Fonts. supabase-js and GSAP are bundled by Vite. The server functions depend on `nodemailer` and `@supabase/supabase-js`. Vite is a dev dependency.
 
 ## Endpoints
 
@@ -89,7 +88,7 @@ The browser loads MediaPipe Pose 0.5.1675469404 from jsDelivr (the script tag ca
 |---|---|---|
 | `/api/evaluate` | POST | Body `{ "payload": "<metrics string>" }`. Calls DeepSeek model `deepseek-chat` with temperature 0.15 and JSON output, and returns the raw DeepSeek response. |
 | `/api/activity` | POST | Needs the header `Authorization: Bearer <Supabase access token>`. The function takes the user from the verified token, ignores any id in the body, records today's activity and returns `weeklyActive` and `daysActiveLast7Days`. It returns 401 for a missing or invalid token and 405 for any other method. |
-| `/api/stats` | GET | Returns `totalUsers`, `activeWeekly` and `activeToday` from the `user_activity` table. |
+| `/api/stats` | GET | Returns `totalUsers`, `activeWeekly` and `activeToday` from the `user_activity` table. It pages through all rows, 1000 at a time, because PostgREST caps a single select at 1000 rows. |
 | `/api/feedback` | POST | Body `{ name, email, message, score }`. Only `message` is required. Sends an email through Gmail SMTP. |
 
 The model is told to return JSON with these keys: `summary` (at most 60 words), `severity`, `current_issues`, `future_risks` and `recommendations` (an array of exactly three strings). The prompt enforces strict anti-slop directives: no em dashes, no empty AI buzzwords, and direct citations of measured numbers and anatomical structures.
