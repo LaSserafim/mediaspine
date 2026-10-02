@@ -70,25 +70,25 @@ api/evaluate.js                 DeepSeek API proxy
 api/activity.js                 records sign-in activity in Supabase
 api/stats.js                    user counts from Supabase
 api/feedback.js                 feedback email over Gmail SMTP
+lib/rateLimit.js                best-effort per-IP limiter used by the api routes
 vite.config.js                  dev server, serves some api routes locally
 vercel.json                     build command (vite build) and output folder (dist)
-public/                         favicon, hero and logo images
+public/                         favicon
 mediaspine logo/                logo and icon assets
-smoke-test.js                   checks index.html, evaluate.js, dist/ and stats.js
-mediaspine_hero.jpg             not referenced by index.html
+smoke-test.js                   checks index.html, evaluate.js, dist/ and stats.js; with a URL, also the live API responses
 MEDIASPINE_FIXLOG.md            log of the earlier fix passes
 AGENTS.md                       instructions for coding agents
 design-engineering-reasoning/   reference notes for coding agents
 ```
 
-The browser loads MediaPipe Pose 0.5.1675469404 and canvas-confetti 1.9.4 from jsDelivr, supabase-js from esm.sh, and the IBM Plex Mono and Inter fonts from Google Fonts. Client animations and 2D canvas visualization are powered by Three.js (WebGPU with WebGL2 fallback) and GSAP. The server functions depend on `nodemailer` and `@supabase/supabase-js`. Vite is a dev dependency.
+The browser loads MediaPipe Pose 0.5.1675469404 from jsDelivr (the script tag carries a subresource integrity hash) and the IBM Plex Mono and Inter fonts from Google Fonts. supabase-js, GSAP and Three.js are bundled by Vite, and Three.js loads only when a score card opens. The server functions depend on `nodemailer` and `@supabase/supabase-js`. Vite is a dev dependency.
 
 ## Endpoints
 
 | Route | Method | What it does |
 |---|---|---|
 | `/api/evaluate` | POST | Body `{ "payload": "<metrics string>" }`. Calls DeepSeek model `deepseek-chat` with temperature 0.15 and JSON output, and returns the raw DeepSeek response. |
-| `/api/activity` | POST, GET | POST needs the header `Authorization: Bearer <Supabase access token>`. The function takes the user from the verified token, ignores any id in the body, records today's activity and returns `weeklyActive` and `daysActiveLast7Days`. It returns 401 for a missing or invalid token. GET with `?user_id=` returns the activity status for that user. |
+| `/api/activity` | POST | Needs the header `Authorization: Bearer <Supabase access token>`. The function takes the user from the verified token, ignores any id in the body, records today's activity and returns `weeklyActive` and `daysActiveLast7Days`. It returns 401 for a missing or invalid token and 405 for any other method. |
 | `/api/stats` | GET | Returns `totalUsers`, `activeWeekly` and `activeToday` from the `user_activity` table. |
 | `/api/feedback` | POST | Body `{ name, email, message, score }`. Only `message` is required. Sends an email through Gmail SMTP. |
 
@@ -160,7 +160,7 @@ node smoke-test.js
 
 The smoke test looks for the Pose script tag in `index.html`, the model name in `api/evaluate.js`, `dist/index.html`, and the Supabase logic in `api/stats.js`, so build first.
 
-`node smoke-test.js https://mediaspine.vercel.app` checks a deployed site instead. It also posts one sample request to `/api/evaluate`, which uses one DeepSeek call and one slot of that IP's rate limit.
+`node smoke-test.js https://mediaspine.vercel.app` checks a deployed site instead (or `http://localhost:5173` with `npx vite --port 5173`, which needs `DEEPSEEK_API_KEY` in `.env.local`). It posts one sample request to `/api/evaluate`, which uses one DeepSeek call and one slot of that IP's rate limit, and checks that each route rejects bad input with the right status.
 
 ## Deploy
 

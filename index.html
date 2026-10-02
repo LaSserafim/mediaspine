@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MediaSpine: Clinical AI Posture Screening</title>
+<meta name="description" content="Check your neck angle, shoulder tilt and posture steadiness with your webcam. Your video stays on your device. Free and open source, built for the SpineSafe NGO.">
+<meta name="theme-color" content="#0F766E">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <!-- MediaPipe Pose (Main thread direct execution) -->
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/pose.js" crossorigin="anonymous"></script>
-
-<!-- Canvas Confetti -->
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/pose.js" integrity="sha384-qcJQ+n/ZcF15Xu2EoRupB4Av+GEAGeW0Td1mp2A90u0NdNLzLYQVMUq1Ax1YAHqk" crossorigin="anonymous"></script>
 
 <style>
   :root {
@@ -43,6 +43,7 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   body {
     background: var(--bg);
     color: var(--ink);
@@ -72,7 +73,7 @@
     font-size: 11px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--turquoise);
+    color: var(--turquoise-dark);
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -110,12 +111,12 @@
     transition: all 0.2s var(--ease);
   }
   .btn-primary {
-    background: var(--turquoise);
+    background: var(--turquoise-dark);
     color: #FFFFFF;
     box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25);
   }
   .btn-primary:hover {
-    background: var(--turquoise-dark);
+    background: #115E59;
     transform: translateY(-1px);
     box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);
   }
@@ -126,7 +127,7 @@
   }
   .btn-ghost:hover {
     border-color: var(--turquoise);
-    color: var(--turquoise);
+    color: var(--turquoise-dark);
     background: var(--turquoise-pale);
   }
   .btn:disabled {
@@ -218,7 +219,7 @@
   }
   .github-pill:hover {
     border-color: var(--turquoise);
-    color: var(--turquoise);
+    color: var(--turquoise-dark);
   }
 
   /* Hero Section */
@@ -618,7 +619,7 @@
     background: var(--amber-pale);
     border: 1px solid rgba(217, 119, 6, 0.3);
     font-size: 13px;
-    color: var(--amber);
+    color: #B45309;
   }
   .limit-notice.show { display: block; }
 
@@ -648,8 +649,8 @@
     font-weight: 600;
     color: var(--ink);
   }
-  .metric-card .val.good { color: var(--turquoise); }
-  .metric-card .val.caution { color: var(--amber); }
+  .metric-card .val.good { color: var(--turquoise-dark); }
+  .metric-card .val.caution { color: #B45309; }
   .metric-card .val.bad { color: var(--red); }
 
   /* AI Report Dashboard */
@@ -815,7 +816,7 @@
   .protocol-title {
     font-family: var(--font-mono);
     font-size: 12px;
-    color: var(--turquoise);
+    color: var(--turquoise-dark);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 600;
@@ -1018,7 +1019,7 @@
   }
   .scan-metrics { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
   .scan-metrics .sm span { display: block; font-size: 11px; color: var(--ink-soft); }
-  .scan-metrics .sm b { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--ink-muted); }
+  .scan-metrics .sm b { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--ink-soft); }
   .scan-metrics .sm small { display: block; font-size: 11px; color: var(--ink-soft); }
   @media (max-width: 900px) {
     .scan-row {
@@ -1182,15 +1183,15 @@
 <div class="stats-strip">
   <div class="wrap stats-grid">
     <div class="stat-card">
-      <div class="num" id="platformTotalUsers">3</div>
+      <div class="num" id="platformTotalUsers">–</div>
       <div class="label">Google Accounts Recorded</div>
     </div>
     <div class="stat-card">
-      <div class="num" id="platformActiveWeekly">3</div>
+      <div class="num" id="platformActiveWeekly">–</div>
       <div class="label">Weekly Active Users (min 1x/wk)</div>
     </div>
     <div class="stat-card">
-      <div class="num" id="platformActiveToday">1</div>
+      <div class="num" id="platformActiveToday">–</div>
       <div class="label">Users Active Today</div>
     </div>
     <div class="stat-card">
@@ -1216,7 +1217,7 @@
           <span id="canvasScanNotice">Hover or drag to inspect the curve</span>
         </div>
         <div class="graph-canvas-box" id="graphCanvasBox">
-          <canvas id="cervicalGraphCanvas"></canvas>
+          <canvas id="cervicalGraphCanvas" role="img" aria-label="Chart of neck load in pounds by forward head tilt: 11 pounds at 0 degrees rising to 54 pounds at 60 degrees."></canvas>
           <div id="graphTooltip" class="graph-tooltip"></div>
         </div>
       </div>
@@ -1278,7 +1279,7 @@
               <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
               <circle cx="12" cy="13" r="4"/>
             </svg>
-            <p style="margin-top:10px; font-size:13px; font-family:var(--font-mono);">Click "Start Camera" below</p>
+            <p id="camHint" style="margin-top:10px; padding:0 24px; max-width:420px; text-align:center; font-size:13px; line-height:1.5; font-family:var(--font-mono);">Click "Start camera" below</p>
           </div>
 
           <div class="countdown-overlay" id="countdownOverlay">
@@ -1365,7 +1366,7 @@
           </div>
         </div>
 
-        <div class="report-actions">
+        <div class="report-actions" id="reportActions">
           <button class="btn btn-primary" id="shareResultBtn">Share score card</button>
           <button class="btn btn-ghost" id="csvBtn">Download report (.csv)</button>
           <button class="btn btn-ghost" id="resetBtn">Reset</button>
@@ -1601,17 +1602,20 @@
 </footer>
 
 <!-- ═══════════════════════════════════════════════════════════════════
-     ES MODULE BUNDLE: Three.js WebGPU 2D Engine, GSAP, Supabase
+     ES MODULE BUNDLE: GSAP, Supabase, lazy Three.js
 ═══════════════════════════════════════════════════════════════════ -->
 <script type="module">
-  import * as THREE from 'three';
-  import { WebGPURenderer } from 'three/webgpu';
   import gsap from 'gsap';
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  import { createClient } from '@supabase/supabase-js';
 
-  window.THREE = THREE;
-  window.WebGPURenderer = WebGPURenderer;
   window.gsap = gsap;
+
+  // Three.js only draws the score-card ring, so it loads on first use instead of with the page.
+  window.loadThree = async () => {
+    if (window.THREE) return;
+    const { WebGLRenderer, Scene, OrthographicCamera, Mesh, MeshBasicMaterial, RingGeometry, CircleGeometry, BufferGeometry, DoubleSide } = await import('three');
+    window.THREE = { WebGLRenderer, Scene, OrthographicCamera, Mesh, MeshBasicMaterial, RingGeometry, CircleGeometry, BufferGeometry, DoubleSide };
+  };
 
   // Supabase Client Setup
   const SUPABASE_URL = 'https://wbnvjyfiegjsogvopyhz.supabase.co';
@@ -1706,14 +1710,10 @@
     }
   }
 
-  supabase.auth.getSession().then(({ data: { session } }) => {
+  // INITIAL_SESSION fires once per page load, so getSession() would only duplicate it.
+  supabase.auth.onAuthStateChange((event, session) => {
     updateAuthUI(session);
-    if (session) pingActivity(session);
-  });
-
-  supabase.auth.onAuthStateChange((_event, session) => {
-    updateAuthUI(session);
-    if (session) pingActivity(session);
+    if (session && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN')) pingActivity(session);
   });
 
   // ═══════════════════════════════════════════════════════════════════
@@ -1817,7 +1817,7 @@
       ctx.strokeStyle = '#E2E8F0';
       ctx.lineWidth = 1;
       ctx.font = '500 10.5px "IBM Plex Mono", monospace';
-      ctx.fillStyle = '#94A3B8';
+      ctx.fillStyle = '#64748B';
       ctx.textAlign = 'right';
 
       for (let lbs = 10; lbs <= 60; lbs += 10) {
@@ -2049,6 +2049,7 @@
       }
       window.gsap.to(state, {
         angle: targetDeg,
+        overwrite: true,
         duration: 0.5,
         ease: 'power2.out',
         onUpdate: () => {
@@ -2132,9 +2133,8 @@
       handleGraphPointer(e);
     });
 
-    window.addEventListener('resize', () => {
-      renderGraph();
-    });
+    new ResizeObserver(() => renderGraph()).observe(canvasBox || canvas);
+    if (document.fonts) document.fonts.ready.then(renderGraph);
 
     updateReadouts(0);
     window.renderBiomechanicalGraph = renderGraph;
@@ -2147,10 +2147,10 @@
 
   // GSAP Animations
   function initGSAPAnimations() {
-    if (!window.gsap) return;
+    if (!window.gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const gsap = window.gsap;
 
-    gsap.from('.hero h1, .hero .lede, .hero-ctas, .telemetry-row', {
+    gsap.from('.hero h1, .hero .lede, .hero-ctas', {
       opacity: 0,
       y: 20,
       duration: 0.8,
@@ -2190,6 +2190,8 @@ const countdownNum     = document.getElementById('countdownNum');
 const countdownLabel   = document.getElementById('countdownLabel');
 const quotaCount       = document.getElementById('quotaCount');
 const limitNotice      = document.getElementById('limitNotice');
+const camHint          = document.getElementById('camHint');
+const CAM_HINT_DEFAULT = 'Click "Start camera" below';
 
 const mNeck        = document.getElementById('mNeck');
 const mShoulder    = document.getElementById('mShoulder');
@@ -2207,6 +2209,7 @@ const aiRisks     = document.getElementById('aiRisks');
 const aiRecs      = document.getElementById('aiRecs');
 const csvBtn      = document.getElementById('csvBtn');
 const resetBtn    = document.getElementById('resetBtn');
+const reportActions = document.getElementById('reportActions');
 
 /* ═══════════════════════════════════════════════════════════════════
    POSE CONNECTIONS
@@ -2271,6 +2274,8 @@ let animFrameId     = null;
 let latestMetrics   = null;
 let currentLandmarks = null;
 let isRecording     = false;
+let snapshotTimer   = null;
+let poseFailures    = 0;
 let lastAIData      = null;
 
 const prevTextCache = {};
@@ -2290,6 +2295,8 @@ const rollingShoulderY = [];
 const rollingNoseX     = [];
 const rollingNoseY     = [];
 const ROLLING_WINDOW   = 30;
+// 3 s at 20+ fps gives 60+ samples; under 20 means the pose track was lost during the hold.
+const MIN_STABILITY_SAMPLES = 20;
 /* ═══════════════════════════════════════════════════════════════════
    DAILY EVALUATION QUOTA
 ═══════════════════════════════════════════════════════════════════ */
@@ -2347,6 +2354,8 @@ if (typeof Pose !== 'undefined') {
   });
   pose.onResults((results) => {
     isProcessing = false;
+    poseFailures = 0;
+    if (!cameraStream) return;
     if (results.poseLandmarks) {
       const metrics = extractPoseMetrics(results.poseLandmarks);
       latestMetrics = metrics;
@@ -2367,6 +2376,7 @@ async function frameLoop() {
     if (pose) await pose.send({ image: video });
   } catch (err) {
     isProcessing = false;
+    if (++poseFailures >= 5) { stopCamera(); showCameraProblem('PoseUnavailable'); }
   }
 }
 
@@ -2502,13 +2512,39 @@ async function requestCameraStream() {
   });
 }
 
+const CAMERA_PROBLEMS = {
+  NotAllowedError: ['CAMERA BLOCKED', 'Camera access is blocked. Allow the camera in your browser settings, then press Start camera.'],
+  SecurityError: ['CAMERA BLOCKED', 'Camera access is blocked. Allow the camera in your browser settings, then press Start camera.'],
+  NotFoundError: ['NO CAMERA', 'No camera was found. Connect one, then press Start camera.'],
+  OverconstrainedError: ['NO CAMERA', 'No camera was found. Connect one, then press Start camera.'],
+  NotReadableError: ['CAMERA BUSY', 'Another app is using the camera. Close it, then press Start camera.'],
+  AbortError: ['CAMERA BUSY', 'Another app is using the camera. Close it, then press Start camera.'],
+  PoseUnavailable: ['MODEL ERROR', 'The posture model could not be loaded. Check your connection and reload the page.'],
+  CameraLost: ['CAMERA OFF', 'The camera was disconnected. Press Start camera to continue.']
+};
+
+function showCameraProblem(name) {
+  const [badge, hint] = CAMERA_PROBLEMS[name] || ['CAMERA ERROR', 'The camera could not start. Reload the page and try again.'];
+  if (camStatus) camStatus.textContent = badge;
+  if (camHint) camHint.textContent = hint;
+  if (camPlaceholder) camPlaceholder.style.display = 'flex';
+}
+
 async function startCamera() {
   try {
     startBtn.disabled = true;
     startBtn.textContent = 'Starting…';
+    if (!pose) throw Object.assign(new Error('Pose model unavailable'), { name: 'PoseUnavailable' });
     cameraStream = await requestCameraStream();
     video.srcObject = cameraStream;
     await video.play();
+    cameraStream.getVideoTracks()[0]?.addEventListener('ended', () => {
+      if (!cameraStream) return;
+      stopCamera();
+      showCameraProblem('CameraLost');
+    });
+    if (camStatus) camStatus.textContent = 'LOADING MODEL';
+    try { await pose.initialize(); } catch (e) { throw Object.assign(new Error('Pose model failed to load'), { name: 'PoseUnavailable' }); }
 
     document.body.classList.add('cam-active');
     if (camStatus) camStatus.textContent = 'LIVE SCREENING';
@@ -2521,9 +2557,8 @@ async function startCamera() {
     frameLoop();
   } catch (err) {
     console.error('Camera start failed:', err);
-    if (camStatus) camStatus.textContent = 'ERROR: ' + err.message;
-    startBtn.disabled = false;
-    startBtn.textContent = 'Start camera';
+    stopCamera();
+    showCameraProblem(err.name);
   }
 }
 
@@ -2534,6 +2569,16 @@ function stopCamera() {
     cameraStream = null;
   }
   if (video) video.srcObject = null;
+  if (snapshotTimer) { clearInterval(snapshotTimer); snapshotTimer = null; }
+  isRecording = false;
+  isProcessing = false;
+  poseFailures = 0;
+  currentLandmarks = null;
+  latestMetrics = null;
+  if (countdownOverlay) countdownOverlay.classList.remove('active');
+  if (canvas && ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (camHint) camHint.textContent = CAM_HINT_DEFAULT;
+  startBtn.disabled = false;
   document.body.classList.remove('cam-active');
   if (camStatus) camStatus.textContent = 'CAMERA OFF';
   if (camPlaceholder) camPlaceholder.style.display = 'flex';
@@ -2581,15 +2626,22 @@ function startStabilitySnapshot() {
   setText(countdownLabel, 'Hold still');
   if (countdownOverlay) countdownOverlay.classList.add('active');
 
-  const timer = setInterval(() => {
+  snapshotTimer = setInterval(() => {
     count--;
     if (count > 0) {
       setText(countdownNum, count);
     } else {
-      clearInterval(timer);
+      clearInterval(snapshotTimer);
+      snapshotTimer = null;
       setText(countdownNum, '✓');
       setText(countdownLabel, 'Analyzing');
       isRecording = false;
+      if (shoulderYData.length < MIN_STABILITY_SAMPLES || noseXData.length < MIN_STABILITY_SAMPLES) {
+        setText(countdownNum, '!');
+        setText(countdownLabel, 'Pose lost. Try again');
+        setTimeout(() => { if (countdownOverlay) countdownOverlay.classList.remove('active'); }, 1800);
+        return;
+      }
 
       const sMax = shoulderYData.length ? Math.max(...shoulderYData) : 0;
       const sMin = shoulderYData.length ? Math.min(...shoulderYData) : 0;
@@ -2670,6 +2722,8 @@ function severityFor(score) {
 /* ═══════════════════════════════════════════════════════════════════
    DEEPSEEK AI EVALUATION CLIENT
 ═══════════════════════════════════════════════════════════════════ */
+const SEVERITIES = ['Normal', 'Very Mild', 'Mild', 'Moderate', 'Moderately Severe', 'Severe'];
+
 function severityColor(label) {
   if (label === 'Normal' || label === 'Very Mild') return '#0F766E';
   if (label === 'Mild' || label === 'Moderate') return '#B45309';
@@ -2730,8 +2784,11 @@ async function runAIEvaluation(shoulderStability, headStability) {
     }
 
     const data = await res.json();
-    const rawContent = data.choices?.[0]?.message?.content || '{}';
-    const parsed = JSON.parse(rawContent);
+    let parsed = null;
+    try { parsed = JSON.parse(data.choices?.[0]?.message?.content); } catch (e) { parsed = null; }
+    if (!parsed || typeof parsed.summary !== 'string' || !SEVERITIES.includes(parsed.severity)) {
+      throw new Error('The evaluation came back in an unexpected format. Please try again.');
+    }
 
     consumeEvalQuota();
 
@@ -2758,6 +2815,7 @@ async function runAIEvaluation(shoulderStability, headStability) {
 
     if (aiLoading) aiLoading.style.display = 'none';
     if (aiResults) aiResults.style.display = 'block';
+    if (reportActions) reportActions.style.display = '';
 
     // Save scan to Supabase if logged in
     if (window.supabaseClient && window.currentUser) {
@@ -2780,7 +2838,13 @@ async function runAIEvaluation(shoulderStability, headStability) {
   } catch (err) {
     if (aiLoading) aiLoading.style.display = 'none';
     if (aiResults) aiResults.style.display = 'block';
-    if (aiSummary) aiSummary.textContent = 'Notice: ' + err.message;
+    if (aiSummary) aiSummary.textContent = err instanceof TypeError ? 'No connection. Check your internet and try again.' : 'Notice: ' + err.message;
+    if (aiSeverity) aiSeverity.textContent = '';
+    fillList(aiCauses, []);
+    fillList(aiRisks, []);
+    fillList(aiRecs, []);
+    lastAIData = null;
+    if (reportActions) reportActions.style.display = 'none';
   } finally {
     if (snapshotBtn) snapshotBtn.disabled = false;
   }
@@ -3142,6 +3206,8 @@ const CARD_MONO = '"IBM Plex Mono", ui-monospace, monospace';
 const CARD_FINAL = { ring: 1, text: 1, rows: 1 };
 const cardClamp = x => Math.max(0, Math.min(1, x));
 
+const loadRing3d = () => (window.loadThree ? window.loadThree().catch(() => {}) : Promise.resolve());
+
 function loadCardFonts() {
   if (!document.fonts) return Promise.resolve();
   return Promise.all([
@@ -3199,6 +3265,7 @@ let ringGL;
 function ringImage(progress, color) {
   const T = window.THREE;
   if (ringGL === false || !T) return null;
+  if (ringGL && ringGL.renderer.getContext().isContextLost()) { ringGL.renderer.dispose(); ringGL = undefined; }
   try {
     if (!ringGL) {
       const renderer = new T.WebGLRenderer({ alpha: true, antialias: true });
@@ -3509,7 +3576,7 @@ async function openShareCard(metrics, parsed, scannedAt) {
     copyBtn.title = ok ? '' : 'The link could not be saved. Download the image instead.';
   });
 
-  await loadCardFonts();
+  await Promise.all([loadCardFonts(), loadRing3d()]);
   openShareModal();
   playResultCard(shareCanvas, payload);
 }
@@ -3523,6 +3590,7 @@ function cardBlob() {
 async function downloadCard() {
   if (!currentShare) return;
   const blob = await cardBlob();
+  if (!blob) { window.showAuthToast?.('Could not create the image.'); return; }
   const a = document.createElement('a');
   a.download = 'MediaSpine_Posture_Score.png';
   a.href = URL.createObjectURL(blob);
@@ -3542,6 +3610,7 @@ async function copyShareLink() {
 async function shareCard() {
   if (!currentShare) return;
   const blob = await cardBlob();
+  if (!blob) { window.showAuthToast?.('Could not create the image.'); return; }
   const file = new File([blob], 'MediaSpine_Posture_Score.png', { type: 'image/png' });
   const data = {
     title: 'My MediaSpine posture score',
@@ -3626,6 +3695,7 @@ async function handleSharedRoute() {
   if (hash.startsWith('#/r/')) {
     const id = hash.slice(4).split('?')[0].trim();
     if (!id) return;
+    if (cameraStream) stopCamera();
 
     mainElements.forEach(el => el.style.display = 'none');
     document.body.classList.add('shared-view');
@@ -3659,7 +3729,7 @@ async function handleSharedRoute() {
     if (resultData) {
       if (cardContent) cardContent.style.display = 'block';
       if (cardExpired) cardExpired.style.display = 'none';
-      loadCardFonts().then(() => playResultCard(publicCanvas, resultData));
+      Promise.all([loadCardFonts(), loadRing3d()]).then(() => playResultCard(publicCanvas, resultData));
     } else {
       if (cardContent) cardContent.style.display = 'none';
       if (cardExpired) cardExpired.style.display = 'block';
