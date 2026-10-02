@@ -1784,9 +1784,10 @@
       ctx.clearRect(0, 0, displayW, displayH);
 
       const padX = 54;
+      const padRight = 54;
       const padY = 32;
-      const graphW = displayW - padX - 24;
-      const graphH = displayH - padY - 46;
+      const graphW = displayW - padX - padRight;
+      const graphH = displayH - padY - 50;
 
       // 1. Shaded Clinical Risk Zones — uniform tint, equal 15° widths
       const zones = [
@@ -2097,7 +2098,8 @@
       const clientY = e.clientY - rect.top;
 
       const padX = 54;
-      const graphW = displayW - padX - 24;
+      const padRight = 54;
+      const graphW = displayW - padX - padRight;
       const rawFrac = (clientX - padX) / graphW;
       const clampedFrac = Math.max(0, Math.min(1, rawFrac));
       hoverAngle = clampedFrac * 60;
