@@ -2,44 +2,28 @@
 // The DEEPSEEK_API_KEY environment variable is set in the Vercel dashboard.
 // It is never sent to the browser.
 
-// In-memory rate limit store: IP -> { count, resetTime }
-const rateLimitMap = new Map();
-const RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
-const MAX_REQUESTS_PER_WINDOW = 20;
+import { allow } from '../lib/rateLimit.js';
+
+// The exact string the client builds: one decimal on angles, three on variance, angle parts in any subset/order.
+const PAYLOAD_RE = /^(?:(?:Neck Deviation Angle|Shoulder Tilt|Head Tilt): \d{1,3}\.\d°, ){0,3}Shoulder Stability: \d\.\d{3} variance over hold window, Head Stability: \d\.\d{3} variance over hold window$/;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Basic per-IP rate limit backstop
-  const forwarded = req.headers['x-forwarded-for'];
-  const ip = (typeof forwarded === 'string' ? forwarded.split(',')[0] : req.socket?.remoteAddress) || 'unknown';
-  const now = Date.now();
-  const clientData = rateLimitMap.get(ip) || { count: 0, resetTime: now + RATE_LIMIT_WINDOW_MS };
-
-  if (now > clientData.resetTime) {
-    clientData.count = 0;
-    clientData.resetTime = now + RATE_LIMIT_WINDOW_MS;
+  const payload = req.body && typeof req.body === 'object' ? req.body.payload : undefined;
+  if (typeof payload !== 'string' || payload.length > 300 || !PAYLOAD_RE.test(payload)) {
+    return res.status(400).json({ error: 'Missing or invalid payload field.' });
   }
 
-  if (clientData.count >= MAX_REQUESTS_PER_WINDOW) {
-    return res.status(429).json({
-      error: 'Daily evaluation limit reached for this IP. Please try again tomorrow.'
-    });
+  if (!allow(req, 'evaluate', 20, 24 * 60 * 60 * 1000)) {
+    return res.status(429).json({ error: 'Daily evaluation limit reached for this IP. Please try again tomorrow.' });
   }
 
-  clientData.count++;
-  rateLimitMap.set(ip, clientData);
-
-  const apiKey = process.env.DEEPSEEK_API_KEY || process.env.GROQ_API_KEY;
+  const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
     return res.status(500).json({ error: 'Server is missing DEEPSEEK_API_KEY. Set this in the Vercel dashboard.' });
-  }
-
-  const { payload } = req.body;
-  if (!payload || typeof payload !== 'string') {
-    return res.status(400).json({ error: 'Missing or invalid payload field.' });
   }
 
   const SYSTEM_PROMPT = `You are the MediaSpine posture assistant. You explain posture screening results to ordinary people with no medical background.
@@ -88,30 +72,34 @@ Shoulder tilt: 0-2 degrees Normal | 2-4 Mild | 4-7 Moderate | 7+ High
 Head tilt: 0-2 degrees Normal | 2-4 Mild | 4-7 Moderate | 7+ Severe
 Stability: lower is steadier. 0.03 or less is steady, up to 0.06 is slight sway, up to 0.10 is noticeable sway, above that is unsteady.`;
 
-  const deepseekRes = await fetch('https://api.deepseek.com/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type':  'application/json'
-    },
-    body: JSON.stringify({
-      model: 'deepseek-chat',
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user',   content: `Here is the raw numerical data: ${payload}.` }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.15,
-      max_tokens: 800
-    })
-  });
-
-  if (!deepseekRes.ok) {
-    const errText = await deepseekRes.text();
-    return res.status(deepseekRes.status).json({ error: `DeepSeek API error: ${deepseekRes.status}`, detail: errText });
+  let data;
+  try {
+    const upstream = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type':  'application/json'
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user',   content: `Here is the raw numerical data: ${payload}.` }
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.15,
+        max_tokens: 800
+      }),
+      signal: AbortSignal.timeout(9000)
+    });
+    if (!upstream.ok) throw new Error(`upstream ${upstream.status}`);
+    data = await upstream.json();
+  } catch (err) {
+    console.error('[DeepSeek]', err.name, err.message);
+    const timedOut = err.name === 'TimeoutError';
+    return res.status(timedOut ? 504 : 502).json({
+      error: timedOut ? 'The evaluation service did not respond. Please try again.' : 'The evaluation service is unavailable. Please try again later.'
+    });
   }
-
-  const data = await deepseekRes.json();
-  res.status(200).json(data);
-
+  return res.status(200).json(data);
 }

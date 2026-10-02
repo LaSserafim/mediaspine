@@ -64,21 +64,6 @@ export default async function handler(req, res) {
     );
     const activeToday = todayUsers.size;
 
-    // 4. Optional specific user check (e.g. ?user_id=...)
-    let specificUser = null;
-    const targetUserId = req.query?.user_id;
-    if (targetUserId) {
-      const userActivityPast7 = records.filter(
-        r => r.user_id === targetUserId && r.activity_date >= sevenDaysAgo && r.activity_date <= todayStr
-      );
-      specificUser = {
-        user_id: targetUserId,
-        activeWeekly: userActivityPast7.length >= 1,
-        activeDaysLast7Days: userActivityPast7.length,
-        dates: userActivityPast7.map(r => r.activity_date)
-      };
-    }
-
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
     return res.status(200).json({
@@ -88,8 +73,7 @@ export default async function handler(req, res) {
       window: {
         start: sevenDaysAgo,
         end: todayStr
-      },
-      specificUser
+      }
     });
   } catch (err) {
     console.error('[Activity stats error]', err);

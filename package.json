@@ -1,13 +1,14 @@
 {
   "name": "mediaspine-landing",
   "version": "1.0.0",
-  "description": "A modern, animated landing page for [MediaSpine](https://mediaspine.vercel.app) — a real-time clinical AI posture and facial biometric scanner built for the SpineSafe NGO Platform.",
+  "description": "Posture screening web app for the SpineSafe NGO platform: on-device pose tracking, plain-language AI results, Supabase sign-in.",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node smoke-test.js"
   },
   "keywords": [],
   "author": "",
