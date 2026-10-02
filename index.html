@@ -1788,12 +1788,12 @@
       const graphW = displayW - padX - 24;
       const graphH = displayH - padY - 46;
 
-      // 1. Shaded Clinical Risk Zones aligned with 15° intervals (15° each)
+      // 1. Shaded Clinical Risk Zones — uniform tint, equal 15° widths
       const zones = [
-        { from: 0, to: 15, fill: 'rgba(13, 148, 136, 0.06)', label: 'Optimal', short: 'Good', color: '#0F766E' },
-        { from: 15, to: 30, fill: 'rgba(217, 119, 6, 0.05)', label: 'Mild strain', short: 'Mild', color: '#B45309' },
-        { from: 30, to: 45, fill: 'rgba(234, 88, 12, 0.05)', label: 'Moderate', short: 'Mod.', color: '#C2410C' },
-        { from: 45, to: 60, fill: 'rgba(220, 38, 38, 0.06)', label: 'Severe', short: 'Severe', color: '#B91C1C' }
+        { from: 0, to: 15, fill: 'rgba(13, 148, 136, 0.045)', label: 'Optimal', short: 'Good', color: '#0F766E' },
+        { from: 15, to: 30, fill: 'rgba(180, 83, 9, 0.04)', label: 'Mild strain', short: 'Mild', color: '#B45309' },
+        { from: 30, to: 45, fill: 'rgba(194, 65, 12, 0.04)', label: 'Moderate', short: 'Mod.', color: '#C2410C' },
+        { from: 45, to: 60, fill: 'rgba(185, 28, 28, 0.045)', label: 'Severe', short: 'Severe', color: '#B91C1C' }
       ];
 
       for (const z of zones) {
@@ -1802,9 +1802,6 @@
         ctx.fillStyle = z.fill;
         ctx.fillRect(x1, padY, x2 - x1, graphH);
 
-        // Gridlines handle the division boundaries cleanly at 15°, 30°, 45°
-
-        // Longest label that fits the zone; narrow screens fall back to the short form
         const fit = [[z.label, 11], [z.label, 9.5], [z.short, 9.5]].find(([text, px]) => {
           ctx.font = `600 ${px}px Inter, sans-serif`;
           return ctx.measureText(text).width <= x2 - x1 - 4;
@@ -1818,13 +1815,14 @@
 
       // 2. Horizontal Force Grid Lines (10 to 60 lbs)
       ctx.strokeStyle = '#E2E8F0';
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 0.75;
+      ctx.setLineDash([]);
       ctx.font = '500 10.5px "IBM Plex Mono", monospace';
       ctx.fillStyle = '#64748B';
       ctx.textAlign = 'right';
 
       for (let lbs = 10; lbs <= 60; lbs += 10) {
-        const y = Math.round(padY + graphH - ((lbs - 10) / 50) * graphH) + 0.5;
+        const y = padY + graphH - ((lbs - 10) / 50) * graphH;
         ctx.beginPath();
         ctx.moveTo(padX, y);
         ctx.lineTo(padX + graphW, y);
@@ -1835,7 +1833,7 @@
       // 3. Vertical Degree Lines (0° to 60°)
       ctx.textAlign = 'center';
       for (let deg = 0; deg <= 60; deg += 15) {
-        const x = Math.round(padX + (deg / 60) * graphW) + 0.5;
+        const x = padX + (deg / 60) * graphW;
         ctx.beginPath();
         ctx.moveTo(x, padY);
         ctx.lineTo(x, padY + graphH);
@@ -1858,30 +1856,39 @@
         ctx.fillText(p.text, px, padY + graphH + 32);
       }
 
-      // 4. Continuous Mathematical Curve (Hansraj Biomechanics)
-      const curve = new Path2D();
-      for (let deg = 0; deg <= 60; deg += 0.5) {
-        const x = padX + (deg / 60) * graphW;
-        const lbs = calculateLoad(deg);
-        const y = padY + graphH - ((lbs - 10) / 50) * graphH;
-        if (deg === 0) curve.moveTo(x, y);
-        else curve.lineTo(x, y);
+      // 4. Smooth Continuous Curve (Hansraj Biomechanics) — quadratic Bézier interpolation
+      const steps = 240;
+      const pts = [];
+      for (let i = 0; i <= steps; i++) {
+        const d = (i / steps) * 60;
+        const lbs = calculateLoad(d);
+        pts.push({ x: padX + (d / 60) * graphW, y: padY + graphH - ((lbs - 10) / 50) * graphH });
       }
 
-      // Fill under the curve only; the outline is stroked from the open path so it never traces the axes
+      const curve = new Path2D();
+      curve.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < pts.length - 1; i++) {
+        const cx = (pts[i].x + pts[i + 1].x) / 2;
+        const cy = (pts[i].y + pts[i + 1].y) / 2;
+        curve.quadraticCurveTo(pts[i].x, pts[i].y, cx, cy);
+      }
+      curve.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+
+      // Gradient fill under the curve
       const area = new Path2D(curve);
       area.lineTo(padX + graphW, padY + graphH);
       area.lineTo(padX, padY + graphH);
       area.closePath();
       const grad = ctx.createLinearGradient(0, padY, 0, padY + graphH);
-      grad.addColorStop(0, 'rgba(13, 148, 136, 0.26)');
-      grad.addColorStop(0.65, 'rgba(13, 148, 136, 0.08)');
+      grad.addColorStop(0, 'rgba(13, 148, 136, 0.22)');
+      grad.addColorStop(0.6, 'rgba(13, 148, 136, 0.06)');
       grad.addColorStop(1, 'rgba(13, 148, 136, 0.00)');
       ctx.fillStyle = grad;
       ctx.fill(area);
 
+      // Stroke the curve with rounded joins for smoothness
       ctx.strokeStyle = '#0D9488';
-      ctx.lineWidth = 3.5;
+      ctx.lineWidth = 2.5;
       ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
       ctx.stroke(curve);
@@ -1893,9 +1900,9 @@
         const hY = padY + graphH - ((hLbs - 10) / 50) * graphH;
 
         ctx.save();
-        ctx.setLineDash([3, 3]);
-        ctx.strokeStyle = 'rgba(13, 148, 136, 0.65)';
-        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 4]);
+        ctx.strokeStyle = 'rgba(13, 148, 136, 0.4)';
+        ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(hX, padY);
         ctx.lineTo(hX, padY + graphH);
@@ -1926,9 +1933,9 @@
 
       // Dashed drop lines for active position
       ctx.save();
-      ctx.setLineDash([4, 4]);
-      ctx.strokeStyle = '#0D9488';
-      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 5]);
+      ctx.strokeStyle = 'rgba(13, 148, 136, 0.5)';
+      ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(curX, padY + graphH);
       ctx.lineTo(curX, curY);
