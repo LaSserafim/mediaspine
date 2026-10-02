@@ -2239,9 +2239,13 @@ function calculateAngle(ear, shoulder) {
 function analyzeFrontalPosture(lm) {
   const leftEye = lm[1], rightEye = lm[4];
   const leftShoulder = lm[11], rightShoulder = lm[12];
+  const dxS = Math.max(Math.abs(leftShoulder.x - rightShoulder.x), 0.001);
+  const dyS = Math.abs(leftShoulder.y - rightShoulder.y);
+  const dxE = Math.max(Math.abs(leftEye.x - rightEye.x), 0.001);
+  const dyE = Math.abs(leftEye.y - rightEye.y);
   return {
-    shoulderTilt: Math.abs(leftShoulder.y - rightShoulder.y) * 100,
-    headTilt: Math.abs(leftEye.y - rightEye.y) * 100
+    shoulderTilt: Math.atan(dyS / dxS) * (180 / Math.PI),
+    headTilt: Math.atan(dyE / dxE) * (180 / Math.PI)
   };
 }
 
@@ -2458,16 +2462,16 @@ function updateUI(metrics) {
     }
 
     if (metrics.shoulderTilt != null) {
-      setText(mShoulder, `${metrics.shoulderTilt.toFixed(1)}%`);
-      mShoulder.className = 'val ' + (metrics.shoulderTilt <= 2 ? 'good' : metrics.shoulderTilt <= 4 ? 'caution' : 'bad');
+      setText(mShoulder, `${metrics.shoulderTilt.toFixed(1)}°`);
+      mShoulder.className = 'val ' + (metrics.shoulderTilt <= 2.5 ? 'good' : metrics.shoulderTilt <= 4.5 ? 'caution' : 'bad');
     } else {
       setText(mShoulder, '- (Profile)');
       mShoulder.className = 'val';
     }
 
     if (metrics.headTilt != null) {
-      setText(mHead, `${metrics.headTilt.toFixed(1)}%`);
-      mHead.className = 'val ' + (metrics.headTilt <= 2 ? 'good' : metrics.headTilt <= 4 ? 'caution' : 'bad');
+      setText(mHead, `${metrics.headTilt.toFixed(1)}°`);
+      mHead.className = 'val ' + (metrics.headTilt <= 2.5 ? 'good' : metrics.headTilt <= 4.5 ? 'caution' : 'bad');
     } else {
       setText(mHead, '- (Profile)');
       mHead.className = 'val';
@@ -2490,7 +2494,7 @@ function updateUI(metrics) {
         const sMax = Math.max(...rollingShoulderY);
         const sMin = Math.min(...rollingShoulderY);
         const liveShoulderStab = (sMax - sMin) * 100;
-        setText(mShoulderStab, `${(liveShoulderStab / 100).toFixed(2)} range`);
+        setText(mShoulderStab, `${(liveShoulderStab / 100).toFixed(2)} var`);
         mShoulderStab.className = 'val ' + (liveShoulderStab < 3.0 ? 'good' : liveShoulderStab < 6.0 ? 'caution' : 'bad');
       } else {
         setText(mShoulderStab, 'Calibrating...');
@@ -2501,7 +2505,7 @@ function updateUI(metrics) {
         const nxMax = Math.max(...rollingNoseX), nxMin = Math.min(...rollingNoseX);
         const nyMax = Math.max(...rollingNoseY), nyMin = Math.min(...rollingNoseY);
         const liveHeadStab = Math.max(nxMax - nxMin, nyMax - nyMin) * 100;
-        setText(mHeadStab, `${(liveHeadStab / 100).toFixed(2)} range`);
+        setText(mHeadStab, `${(liveHeadStab / 100).toFixed(2)} var`);
         mHeadStab.className = 'val ' + (liveHeadStab < 3.0 ? 'good' : liveHeadStab < 6.0 ? 'caution' : 'bad');
       } else {
         setText(mHeadStab, 'Calibrating...');
@@ -2681,10 +2685,8 @@ function startStabilitySnapshot() {
       const nyMax = noseYData.length ? Math.max(...noseYData) : 0;
       const nyMin = noseYData.length ? Math.min(...noseYData) : 0;
       const headStability = Math.max(nxMax - nxMin, nyMax - nyMin) * 100;
-
-      setText(mShoulderStab, `${(shoulderStability / 100).toFixed(2)} range`);
-      setText(mHeadStab, `${(headStability / 100).toFixed(2)} range`);
-
+      setText(mShoulderStab, `${(shoulderStability / 100).toFixed(2)} var`);
+      setText(mHeadStab, `${(headStability / 100).toFixed(2)} var`);
       runAIEvaluation(shoulderStability, headStability);
       setTimeout(() => {
         if (countdownOverlay) countdownOverlay.classList.remove('active');
@@ -2709,19 +2711,17 @@ function computePostureScore(m) {
   else if (neck <= 15) neckPenalty = 13 + (neck - 10) * 2.2;
   else if (neck <= 20) neckPenalty = 24 + (neck - 15) * 1.8;
   else neckPenalty = Math.min(40, 33 + (neck - 20) * 1.2);
-
   let shoulderPenalty = 0;
-  if (shoulder <= 2) shoulderPenalty = shoulder * 1.5;
-  else if (shoulder <= 4) shoulderPenalty = 3 + (shoulder - 2) * 2.5;
-  else if (shoulder <= 7) shoulderPenalty = 8 + (shoulder - 4) * 2.0;
-  else shoulderPenalty = Math.min(20, 14 + (shoulder - 7) * 1.2);
+  if (shoulder <= 2.5) shoulderPenalty = shoulder * 1.5;
+  else if (shoulder <= 4.5) shoulderPenalty = 3.75 + (shoulder - 2.5) * 2.5;
+  else if (shoulder <= 7.0) shoulderPenalty = 8.75 + (shoulder - 4.5) * 2.0;
+  else shoulderPenalty = Math.min(20, 13.75 + (shoulder - 7.0) * 1.2);
 
   let headPenalty = 0;
-  if (head <= 2) headPenalty = head * 1.5;
-  else if (head <= 4) headPenalty = 3 + (head - 2) * 2.5;
-  else if (head <= 7) headPenalty = 8 + (head - 4) * 2.0;
-  else headPenalty = Math.min(20, 14 + (head - 7) * 1.2);
-
+  if (head <= 2.5) headPenalty = head * 1.5;
+  else if (head <= 4.5) headPenalty = 3.75 + (head - 2.5) * 2.5;
+  else if (head <= 7.0) headPenalty = 8.75 + (head - 4.5) * 2.0;
+  else headPenalty = Math.min(20, 13.75 + (head - 7.0) * 1.2);
   const calcStab = (stab) => {
     if (stab <= 0.03) return stab * (2 / 0.03);
     if (stab <= 0.06) return 2 + (stab - 0.03) * (2.2 / 0.03);
@@ -2786,14 +2786,13 @@ async function runAIEvaluation(shoulderStability, headStability) {
     parts.push(`Neck Deviation Angle: ${scan.neckDeviationAngle.toFixed(1)}°`);
   }
   if (scan.shoulderTilt != null) {
-    parts.push(`Shoulder Tilt: ${scan.shoulderTilt.toFixed(1)}% of frame height`);
+    parts.push(`Shoulder Tilt: ${scan.shoulderTilt.toFixed(1)}°`);
   }
   if (scan.headTilt != null) {
-    parts.push(`Head Tilt: ${scan.headTilt.toFixed(1)}% of frame height`);
+    parts.push(`Head Tilt: ${scan.headTilt.toFixed(1)}°`);
   }
-  parts.push(`Shoulder Stability: ${scan.shoulderStability.toFixed(3)} range of movement over hold window`);
-  parts.push(`Head Stability: ${scan.headStability.toFixed(3)} range of movement over hold window`);
-
+  parts.push(`Shoulder Stability: ${scan.shoulderStability.toFixed(3)} variance over hold window`);
+  parts.push(`Head Stability: ${scan.headStability.toFixed(3)} variance over hold window`);
   const payloadString = parts.join(', ');
 
   if (report) report.style.display = 'block';
@@ -3004,8 +3003,8 @@ const PROGRESS_METRICS = [
     bands: [[75, 100, 0], [58, 75, 1], [0, 58, 2]]
   },
   limitMetric('neck_deviation', 'Neck', 'Lower is better. 0° means your ear sits directly above your shoulder.', 'a side view', [5, 10], 1, '°'),
-  limitMetric('shoulder_tilt', 'Shoulder tilt', 'Lower is better. 0% means level shoulders. Shown as percent of picture height.', 'a front view', [2, 4], 1, '%'),
-  limitMetric('head_tilt', 'Head tilt', 'Lower is better. 0% means your head sits level. Shown as percent of picture height.', 'a front view', [2, 4], 1, '%'),
+  limitMetric('shoulder_tilt', 'Shoulder tilt', 'Lower is better. 0° means level shoulders.', 'a front view', [2.5, 4.5], 1, '°'),
+  limitMetric('head_tilt', 'Head tilt', 'Lower is better. 0° means your head sits level.', 'a front view', [2.5, 4.5], 1, '°'),
   limitMetric('shoulder_stability', 'Shoulder steadiness', 'Lower is better. How much your shoulders drift during the 3-second hold.', 'any scan', [0.03, 0.06], 3, ''),
   limitMetric('head_stability', 'Head steadiness', 'Lower is better. How much your head drifts during the 3-second hold.', 'any scan', [0.03, 0.06], 3, '')
 ];

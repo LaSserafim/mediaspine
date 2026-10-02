@@ -4,9 +4,9 @@
 
 import { allow } from '../lib/rateLimit.js';
 
-// The exact string the client builds: angles with one decimal, tilts as a percent of frame height, stability as a three-decimal range of movement.
-// Angle and tilt parts are optional and appear in this order; stability parts are always last.
-const PAYLOAD_RE = /^(?:(?:Neck Deviation Angle: \d{1,3}\.\d°|(?:Shoulder|Head) Tilt: \d{1,3}\.\d% of frame height), ){0,3}Shoulder Stability: \d\.\d{3} range of movement over hold window, Head Stability: \d\.\d{3} range of movement over hold window$/;
+// The exact string the client builds: angles in degrees with one decimal, stability as variance or range of movement.
+// Angle and tilt parts are optional; stability parts are always last.
+const PAYLOAD_RE = /^(?:(?:Neck Deviation Angle: \d{1,3}\.\d°|(?:Shoulder|Head) Tilt: \d{1,3}\.\d°|(?:Shoulder|Head) Tilt: \d{1,3}\.\d% of frame height), ){0,3}Shoulder Stability: \d\.\d{3} (?:variance|range of movement) over hold window, Head Stability: \d\.\d{3} (?:variance|range of movement) over hold window$/;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
