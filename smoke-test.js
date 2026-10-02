@@ -105,6 +105,7 @@ if (targetUrl) {
   });
 
   global.document = {
+    addEventListener() {},
     querySelectorAll: () => [],
     querySelector: (sel) => makeMockEl(),
     getElementById: (id) => makeMockEl(id),
