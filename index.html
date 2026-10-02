@@ -890,7 +890,7 @@
     background: var(--bg-subtle);
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
-    display: none;
+    display: block;
   }
   .progress-stats-row {
     display: grid;
@@ -1149,7 +1149,7 @@
       <a href="#benefits">Benefits</a>
       <a href="#testimony">Testing</a>
       <a href="#feedback">Feedback</a>
-      <a href="#progress" id="progressNav" style="display:none;">My Progress</a>
+      <a href="#progress" id="progressNav">My Progress</a>
     </div>
     <div class="nav-actions">
       <a href="https://github.com/LaSserafim/mediaspine" target="_blank" rel="noopener noreferrer" class="github-pill" aria-label="MediaSpine on GitHub">
@@ -1308,7 +1308,7 @@
           </div>
           <div class="quota-badge" id="quotaBadge">
             <span>Free daily evaluations:</span>
-            <strong id="quotaCount" aria-live="polite" style="color:var(--turquoise-dark); font-family:var(--font-mono);">5/5 remaining</strong>
+            <strong id="quotaCount" aria-live="polite" style="color:var(--turquoise-dark); font-family:var(--font-mono);">10/10 remaining</strong>
           </div>
         </div>
 
@@ -1500,7 +1500,7 @@
     <div class="section-head">
       <div class="eyebrow">Your record</div>
       <h2>My Progress</h2>
-      <p>Every scan you take while signed in is saved here with its date, time and severity.</p>
+      <p>Every scan you take is recorded here in your history with date, time, and clinical metrics.</p>
     </div>
 
     <div class="progress-stats-row" id="progressStats">
@@ -1686,15 +1686,12 @@
         userAvatar.style.display = 'inline-block';
       }
       if (progressNav) progressNav.style.display = 'inline-block';
-      if (progressSection) progressSection.style.display = 'block';
       if (typeof window.loadProgressData === 'function') {
         window.loadProgressData();
       }
     } else {
       if (authBtn) authBtn.style.display = 'inline-flex';
       if (userMenu) userMenu.style.display = 'none';
-      if (progressNav) progressNav.style.display = 'none';
-      if (progressSection) progressSection.style.display = 'none';
     }
   }
 
@@ -2322,7 +2319,7 @@ const MIN_STABILITY_SAMPLES = 20;
 /* ═══════════════════════════════════════════════════════════════════
    DAILY EVALUATION QUOTA
 ═══════════════════════════════════════════════════════════════════ */
-const DAILY_EVAL_LIMIT = 5;
+const DAILY_EVAL_LIMIT = 10;
 
 function getTodayKey() {
   const d = new Date();
@@ -2868,27 +2865,47 @@ async function runAIEvaluation(shoulderStability, headStability) {
     }
     if (reportActions) reportActions.style.display = '';
 
-    // Save scan to Supabase if logged in
+    // Save scan to local history and Supabase
+    const scanRecord = {
+      id: 'local-' + Date.now(),
+      user_id: window.currentUser ? window.currentUser.id : 'local',
+      created_at: new Date().toISOString(),
+      neck_deviation: scan.neckDeviationAngle != null ? parseFloat(scan.neckDeviationAngle.toFixed(2)) : null,
+      shoulder_tilt: scan.shoulderTilt != null ? parseFloat(scan.shoulderTilt.toFixed(2)) : null,
+      head_tilt: scan.headTilt != null ? parseFloat(scan.headTilt.toFixed(2)) : null,
+      shoulder_stability: parseFloat(scan.shoulderStability.toFixed(3)),
+      head_stability: parseFloat(scan.headStability.toFixed(3)),
+      severity: parsed.severity,
+      ai_result: parsed
+    };
+
+    // Save to localStorage so scans are never lost
+    try {
+      const localKey = 'mediaspine_scans_history';
+      const existing = JSON.parse(localStorage.getItem(localKey) || '[]');
+      existing.push(scanRecord);
+      localStorage.setItem(localKey, JSON.stringify(existing.slice(-200)));
+    } catch (e) {}
+
     if (window.supabaseClient && window.currentUser) {
       try {
         const { error: saveError } = await window.supabaseClient.from('scans').insert({
           user_id: window.currentUser.id,
-          neck_deviation: scan.neckDeviationAngle != null ? parseFloat(scan.neckDeviationAngle.toFixed(2)) : null,
-          shoulder_tilt: scan.shoulderTilt != null ? parseFloat(scan.shoulderTilt.toFixed(2)) : null,
-          head_tilt: scan.headTilt != null ? parseFloat(scan.headTilt.toFixed(2)) : null,
-          shoulder_stability: parseFloat(scan.shoulderStability.toFixed(3)),
-          head_stability: parseFloat(scan.headStability.toFixed(3)),
-          severity: parsed.severity,
-          ai_result: parsed
+          neck_deviation: scanRecord.neck_deviation,
+          shoulder_tilt: scanRecord.shoulder_tilt,
+          head_tilt: scanRecord.head_tilt,
+          shoulder_stability: scanRecord.shoulder_stability,
+          head_stability: scanRecord.head_stability,
+          severity: scanRecord.severity,
+          ai_result: scanRecord.ai_result
         });
         if (saveError) throw saveError;
-        if (typeof window.loadProgressData === 'function') {
-          window.loadProgressData();
-        }
       } catch (saveErr) {
         console.error('Scan save failed:', saveErr);
-        window.showAuthToast?.('Your result is shown, but it could not be saved to your history.');
       }
+    }
+    if (typeof window.loadProgressData === 'function') {
+      window.loadProgressData();
     }
   } catch (err) {
     if (aiLoading) aiLoading.style.display = 'none';
@@ -3203,7 +3220,6 @@ function renderProgress() {
 }
 
 async function loadProgressData() {
-  if (!window.supabaseClient || !window.currentUser) return;
   const safeAiResult = (raw) => {
     if (!raw || typeof raw !== 'object') return null;
     const list = (v) => (Array.isArray(v) ? v : []).filter(t => typeof t === 'string').slice(0, 6);
@@ -3215,17 +3231,38 @@ async function loadProgressData() {
       recommendations: list(raw.recommendations)
     };
   };
-  try {
-    const { data, error } = await window.supabaseClient
-      .from('scans')
-      .select('*')
-      .eq('user_id', window.currentUser.id)
-      .order('created_at', { ascending: true })
-      .limit(200);
-    progressScans = error ? [] : (data || []).map(s => ({ ...s, ai_result: safeAiResult(s.ai_result) }));
-  } catch (err) {
-    progressScans = [];
+
+  let remoteScans = [];
+  if (window.supabaseClient && window.currentUser) {
+    try {
+      const { data, error } = await window.supabaseClient
+        .from('scans')
+        .select('*')
+        .eq('user_id', window.currentUser.id)
+        .order('created_at', { ascending: true })
+        .limit(200);
+      if (!error && data) remoteScans = data;
+    } catch (err) {}
   }
+
+  let localScans = [];
+  try {
+    localScans = JSON.parse(localStorage.getItem('mediaspine_scans_history') || '[]');
+  } catch (e) {}
+
+  // Merge remote and local scans, deduplicating
+  const combined = [...localScans, ...remoteScans];
+  const seen = new Set();
+  const unique = [];
+  for (const s of combined) {
+    const key = `${s.created_at}-${s.neck_deviation}-${s.severity}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push({ ...s, ai_result: safeAiResult(s.ai_result) });
+    }
+  }
+  unique.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  progressScans = unique;
   renderProgress();
 }
 window.loadProgressData = loadProgressData;
@@ -3818,9 +3855,13 @@ async function handleSharedRoute() {
 if (typeof window !== 'undefined') {
   window.addEventListener('hashchange', handleSharedRoute);
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', handleSharedRoute);
+    document.addEventListener('DOMContentLoaded', () => {
+      handleSharedRoute();
+      if (typeof window.loadProgressData === 'function') window.loadProgressData();
+    });
   } else {
     handleSharedRoute();
+    if (typeof window.loadProgressData === 'function') window.loadProgressData();
   }
 }
 </script>
