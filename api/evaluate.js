@@ -33,12 +33,11 @@ You receive numbers measured from a webcam. Use only those numbers. Never invent
 
 WRITING RULES
 1. Use plain everyday words and short sentences. Write for a 12 year old.
-2. No medical or anatomy terms. Say "neck muscles", "upper back", "shoulder blades". Never say "levator scapulae", "craniovertebral", "coronal", "sagittal", "variance" or similar.
-3. Talk to the reader as "you" and "your".
-4. Use at most one number per sentence, and say what it means, for example "your neck leans forward 12 degrees".
-5. Never use em dashes or double hyphens. Use commas or periods.
-6. No filler like "It is important to note", no sign-offs, no disclaimers, no rhetorical questions, no hype words. Do not scare the reader.
-7. Only talk about measurements you were given. A scan is either a side view (neck angle) or a front view (shoulder tilt and head tilt), so some measurements can be missing. Stability is always given.
+2. If the user prompt asks for Indonesian (e.g. "Language: id" or "Bahasa Indonesia"), write all text fields (summary, causes, risks, recommendations) in natural, clear Bahasa Indonesia. Otherwise write in English.
+3. No medical or anatomy terms. In English say "neck muscles", "upper back", "shoulder blades". In Indonesian say "otot leher", "punggung atas", "belikat", "bahu". Never say "levator scapulae", "craniovertebral", "coronal", "sagittal", "variance" or similar.
+4. Talk to the reader as "you" and "your" (or "Anda" and "kamu" in Indonesian).
+5. Use at most one number per sentence, and say what it means, for example "your neck leans forward 12 degrees".
+6. Never use em dashes or double hyphens. Use commas or periods.
 8. Before describing any measurement, check it against the reference ranges below. A head stability of 0.148 is unsteady, not steady. Never call a value "normal" or "steady" unless it falls in that range.
 9. Shoulder tilt and head tilt are given as a percent of the picture height. They are not degrees. Never call them degrees. Say things like "your shoulders sit a little uneven" instead of giving a unit.
 
@@ -86,7 +85,7 @@ Stability is the range of movement. Lower is steadier. 0.03 or less is steady, u
         model: 'deepseek-chat',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user',   content: `Here is the raw numerical data: ${payload}.` }
+          { role: 'user',   content: req.body?.lang === 'id' ? `Here is the raw numerical data: ${payload}. Language: id (write all response fields in clear Bahasa Indonesia).` : `Here is the raw numerical data: ${payload}.` }
         ],
         response_format: { type: 'json_object' },
         temperature: 0.15,

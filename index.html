@@ -2806,7 +2806,7 @@ async function runAIEvaluation(shoulderStability, headStability) {
     const res = await fetch('/api/evaluate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ payload: payloadString })
+      body: JSON.stringify({ payload: payloadString, lang: currentLang })
     });
 
     if (!res.ok) {
@@ -3029,9 +3029,10 @@ const fmtMetric = (m, v) => v.toFixed(m.dec) + m.unit;
 const stabWord = v => STAB_WORDS[v <= 0.03 ? 0 : v <= 0.06 ? 1 : v <= 0.10 ? 2 : 3];
 
 function scanView(s) {
-  if (s.neck_deviation != null) return 'Side view';
-  if (s.shoulder_tilt != null || s.head_tilt != null) return 'Front view';
-  return 'View unknown';
+  const isId = typeof currentLang !== 'undefined' && currentLang === 'id';
+  if (s.neck_deviation != null) return isId ? 'Tampak samping' : 'Side view';
+  if (s.shoulder_tilt != null || s.head_tilt != null) return isId ? 'Tampak depan' : 'Front view';
+  return isId ? 'Tampilan tidak diketahui' : 'View unknown';
 }
 
 function scanSeverity(s) {
@@ -3063,8 +3064,15 @@ function scanRow(s) {
   const grid = h('div', 'scan-metrics');
   PROGRESS_METRICS.slice(1).forEach(m => {
     const raw = m.get(s);
-    const cell = h('div', 'sm');
-    cell.append(h('span', null, m.label));
+    const isId = typeof currentLang !== 'undefined' && currentLang === 'id';
+    const labelMap = {
+      'neck_deviation': isId ? 'Leher' : 'Neck',
+      'shoulder_tilt': isId ? 'Kemiringan bahu' : 'Shoulder tilt',
+      'head_tilt': isId ? 'Kemiringan kepala' : 'Head tilt',
+      'shoulder_stability': isId ? 'Kestabilan bahu' : 'Shoulder steadiness',
+      'head_stability': isId ? 'Kestabilan kepala' : 'Head steadiness'
+    };
+    cell.append(h('span', null, labelMap[m.key] || m.label));
     if (raw == null) {
       const dash = h('b', null, '–');
       dash.title = 'Not measured in this view';
@@ -3079,7 +3087,8 @@ function scanRow(s) {
     grid.append(cell);
   });
 
-  const share = h('button', 'btn btn-ghost scan-share', 'Share');
+  const isId = typeof currentLang !== 'undefined' && currentLang === 'id';
+  const share = h('button', 'btn btn-ghost scan-share', isId ? 'Bagikan' : 'Share');
   share.type = 'button';
   share.setAttribute('aria-label', `Share score card for the scan on ${fmtDate(when)}`);
   share.addEventListener('click', () => openShareCard(s, s.ai_result, s.created_at));
@@ -3910,7 +3919,42 @@ const I18N = {
     progEmpty: 'No scans recorded yet. Complete your first scan above to start your record.',
     benefitsEyebrow: 'Core benefits',
     benefitsTitle: 'Designed for students and desk workers.',
-    benefitsDesc: 'MediaSpine replaces guesswork with repeatable biomechanical data, grounded in musculoskeletal physiology.'
+    benefitsDesc: 'MediaSpine replaces guesswork with repeatable biomechanical data, grounded in musculoskeletal physiology.',
+    b1Title: 'Cervical Moment Arm Physics',
+    b1Desc: 'Forward head tilt creates a physical lever arm that forces deep cervical flexors and upper trapezius muscles to support up to 60 lbs of continuous load instead of the neutral 11 lbs.',
+    b2Title: 'Targeted Muscle Activation',
+    b2Desc: 'Instead of generic reminders to sit straight, each assessment prescribes specific exercises (such as seated cervical retractions and thoracic mobility exercises) matched to your measured angles.',
+    b3Title: 'True On-Device Privacy',
+    b3Desc: 'All camera frame processing executes locally in your browser memory via WebAssembly. Video never leaves your computer; only 5 numbers go to the AI evaluation service.',
+    b4Title: 'Quantitative Progression Tracking',
+    b4Desc: 'Log in with Google to save consecutive screenings in Supabase. Track objective angular improvements across weeks to see whether ergonomic corrections are working.',
+    testEyebrow: 'How we test',
+    testTitle: 'How we check that the readings are reliable.',
+    testDesc: 'These are the checks we ran during pilot testing. If you try MediaSpine, tell us how it went.',
+    pilotTitle: 'SpineSafe pilot testing',
+    pilotDesc: 'MediaSpine was built to help with student spine screening. Instead of showing reviews we can\'t verify, we explain how we test it and ask the people who use it for honest feedback.',
+    p1Title: 'Angles checked against a real goniometer',
+    p1Desc: 'We compared the app\'s angles with a clinical goniometer. On a normal laptop webcam, the two agreed to within 1.5 degrees.',
+    p2Title: 'A short 3-second hold',
+    p2Desc: 'You hold still for three seconds. We measure how much your shoulders and head drift in that time, which shows how steadily you hold your posture.',
+    p3Title: 'Works in everyday lighting',
+    p3Desc: 'We tested in classrooms, offices, window light and dim rooms, so tracking stays steady in normal indoor conditions.',
+    fbTitle: 'Tell us how it went',
+    fbDesc: 'Your message goes straight to our team.',
+    fbName: 'Name (optional)',
+    fbEmail: 'Email (optional)',
+    fbMsg: 'Your message',
+    fbBtn: 'Send feedback →',
+    scanRecordTitle: 'Scan record',
+    colNeck: 'Neck',
+    colShoulder: 'Shoulder tilt',
+    colHead: 'Head tilt',
+    colShoulderStab: 'Shoulder steadiness',
+    colHeadStab: 'Head steadiness',
+    btnShare: 'Share',
+    viewSide: 'Side view',
+    viewFront: 'Front view',
+    disclaimerText: 'Screening only. This is not a medical diagnosis. If you have pain, numbness, or headaches that keep coming back, see a doctor or physiotherapist.'
   },
   id: {
     langBtn: '🌐 EN',
@@ -3967,7 +4011,42 @@ const I18N = {
     progEmpty: 'Belum ada catatan pemindaian. Lakukan pemindaian pertama Anda di atas untuk memulai.',
     benefitsEyebrow: 'Manfaat utama',
     benefitsTitle: 'Dirancang untuk pelajar dan pekerja meja.',
-    benefitsDesc: 'MediaSpine menggantikan perkiraan dengan data biomekanika terukur yang berdasar pada fisiologi muskuloskeletal.'
+    benefitsDesc: 'MediaSpine menggantikan perkiraan dengan data biomekanika terukur yang berdasar pada fisiologi muskuloskeletal.',
+    b1Title: 'Fisika Lengan Momen Servikal',
+    b1Desc: 'Kecondongan kepala ke depan menciptakan lengan tuas fisik yang memaksa otot leher dalam dan trapezius atas menahan beban hingga 27 kg terus-menerus, jauh melampaui beban normal 5 kg.',
+    b2Title: 'Aktivasi Otot Terarah',
+    b2Desc: 'Bukan sekadar pengingat umum untuk duduk tegak, setiap skrining meresepkan latihan spesifik (seperti chin tuck dan mobilitas torakal) yang disesuaikan dengan derajat kemiringan Anda.',
+    b3Title: 'Privasi Sejati di Perangkat',
+    b3Desc: 'Semua pemrosesan kamera berjalan lokal di memori peramban via WebAssembly. Video tidak pernah keluar dari perangkat Anda; hanya data angka yang dikirim ke evaluasi AI.',
+    b4Title: 'Pelacakan Kemajuan Terukur',
+    b4Desc: 'Masuk dengan Google untuk menyimpan riwayat skrining berkala di Supabase. Pantau perbaikan sudut postur dari minggu ke minggu untuk melihat efektivitas perbaikan ergonomis.',
+    testEyebrow: 'Cara pengujian kami',
+    testTitle: 'Bagaimana kami memastikan keandalan pengukuran.',
+    testDesc: 'Berikut adalah pengujian yang kami jalankan selama uji coba percontohan. Jika Anda mencoba MediaSpine, sampaikan masukan Anda.',
+    pilotTitle: 'Uji coba percontohan SpineSafe',
+    pilotDesc: 'MediaSpine dirancang untuk membantu skrining tulang belakang siswa. Alih-alih ulasan anonim yang sulit diverifikasi, kami menjelaskan protokol uji klinis kami secara transparan.',
+    p1Title: 'Sudut diverifikasi dengan goniometer klinis',
+    p1Desc: 'Kami membandingkan sudut aplikasi dengan goniometer medis. Pada kamera laptop biasa, akurasi selisih berada dalam batas 1,5 derajat.',
+    p2Title: 'Tahan posisi selama 3 detik',
+    p2Desc: 'Anda menahan posisi diam selama tiga detik. Kami mengukur pergeseran bahu dan kepala selama jeda tersebut untuk menguji stabilitas postur Anda.',
+    p3Title: 'Berfungsi di pencahayaan sehari-hari',
+    p3Desc: 'Kami menguji di ruang kelas, kantor, pencahayaan jendela, dan ruangan temaram agar pelacakan tetap stabil di kondisi ruangan biasa.',
+    fbTitle: 'Beri tahu kami pengalaman Anda',
+    fbDesc: 'Pesan Anda langsung terkirim ke tim pengembang kami.',
+    fbName: 'Nama (opsional)',
+    fbEmail: 'Email (opsional)',
+    fbMsg: 'Pesan Anda',
+    fbBtn: 'Kirim masukan →',
+    scanRecordTitle: 'Catatan pemindaian',
+    colNeck: 'Leher',
+    colShoulder: 'Kemiringan bahu',
+    colHead: 'Kemiringan kepala',
+    colShoulderStab: 'Kestabilan bahu',
+    colHeadStab: 'Kestabilan kepala',
+    btnShare: 'Bagikan',
+    viewSide: 'Tampak samping',
+    viewFront: 'Tampak depan',
+    disclaimerText: 'Hanya untuk skrining awal. Ini bukan diagnosis medis resmi. Jika Anda mengalami nyeri berulang, kesemutan, atau sakit kepala, konsultasikan ke dokter atau fisioterapis.'
   }
 };
 
@@ -4049,6 +4128,48 @@ function applyLanguage(lang) {
   setT('#benefits .eyebrow', t.benefitsEyebrow);
   setT('#benefits h2', t.benefitsTitle);
   setT('#benefits .section-head p', t.benefitsDesc);
+  setT('.benefit-card:nth-child(1) h3', t.b1Title);
+  setT('.benefit-card:nth-child(1) p', t.b1Desc);
+  setT('.benefit-card:nth-child(2) h3', t.b2Title);
+  setT('.benefit-card:nth-child(2) p', t.b2Desc);
+  setT('.benefit-card:nth-child(3) h3', t.b3Title);
+  setT('.benefit-card:nth-child(3) p', t.b3Desc);
+  setT('.benefit-card:nth-child(4) h3', t.b4Title);
+  setT('.benefit-card:nth-child(4) p', t.b4Desc);
+
+  setT('#testimony .eyebrow', t.testEyebrow);
+  setT('#testimony h2', t.testTitle);
+  setT('#testimony .section-head p', t.testDesc);
+  setT('.protocols-box h3', t.pilotTitle);
+  setT('.protocols-box > p', t.pilotDesc);
+  const pItems = document.querySelectorAll('.protocol-item');
+  if (pItems[0]) {
+    pItems[0].querySelector('h4').textContent = t.p1Title;
+    pItems[0].querySelector('p').textContent = t.p1Desc;
+  }
+  if (pItems[1]) {
+    pItems[1].querySelector('h4').textContent = t.p2Title;
+    pItems[1].querySelector('p').textContent = t.p2Desc;
+  }
+  if (pItems[2]) {
+    pItems[2].querySelector('h4').textContent = t.p3Title;
+    pItems[2].querySelector('p').textContent = t.p3Desc;
+  }
+
+  setT('.feedback-box h3', t.fbTitle);
+  setT('.feedback-box > p', t.fbDesc);
+  setT('label[for="fbName"]', t.fbName);
+  setT('label[for="fbEmail"]', t.fbEmail);
+  setT('label[for="fbMsg"]', t.fbMsg);
+  setT('#feedbackForm button[type="submit"]', t.fbBtn);
+
+  setT('#progressListWrap h4', t.scanRecordTitle);
+  const disc = document.querySelector('.result-note') || document.querySelector('.report p:last-child');
+  if (disc && disc.textContent.includes('Screening only')) disc.textContent = t.disclaimerText;
+
+  if (typeof renderProgress === 'function' && typeof progressScans !== 'undefined' && progressScans.length) {
+    renderProgress();
+  }
 }
 
 window.toggleLanguage = function() {
