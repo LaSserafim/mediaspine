@@ -1790,11 +1790,12 @@
       const graphH = displayH - padY - 50;
 
       // 1. Shaded Clinical Risk Zones — uniform tint, equal 15° widths
+      const isId = typeof currentLang !== 'undefined' && currentLang === 'id';
       const zones = [
-        { from: 0, to: 15, fill: 'rgba(13, 148, 136, 0.045)', label: 'Optimal', short: 'Good', color: '#0F766E' },
-        { from: 15, to: 30, fill: 'rgba(180, 83, 9, 0.04)', label: 'Mild strain', short: 'Mild', color: '#B45309' },
-        { from: 30, to: 45, fill: 'rgba(194, 65, 12, 0.04)', label: 'Moderate', short: 'Mod.', color: '#C2410C' },
-        { from: 45, to: 60, fill: 'rgba(185, 28, 28, 0.045)', label: 'Severe', short: 'Severe', color: '#B91C1C' }
+        { from: 0, to: 15, fill: 'rgba(13, 148, 136, 0.045)', label: 'Optimal', short: isId ? 'Bagus' : 'Good', color: '#0F766E' },
+        { from: 15, to: 30, fill: 'rgba(180, 83, 9, 0.04)', label: isId ? 'Tegang ringan' : 'Mild strain', short: isId ? 'Ringan' : 'Mild', color: '#B45309' },
+        { from: 30, to: 45, fill: 'rgba(194, 65, 12, 0.04)', label: isId ? 'Beban sedang' : 'Moderate', short: isId ? 'Sedang' : 'Mod.', color: '#C2410C' },
+        { from: 45, to: 60, fill: 'rgba(185, 28, 28, 0.045)', label: isId ? 'Beban berat' : 'Severe', short: isId ? 'Berat' : 'Severe', color: '#B91C1C' }
       ];
 
       for (const z of zones) {
@@ -1844,11 +1845,11 @@
 
       // Reference Posture Markers along X axis
       const refPins = [
-        { deg: 0, text: 'Neutral' },
-        { deg: 15, text: 'Desktop' },
-        { deg: 30, text: 'Laptop' },
-        { deg: 45, text: 'Phone' },
-        { deg: 60, text: 'Slump' }
+        { deg: 0, text: isId ? 'Netral' : 'Neutral' },
+        { deg: 15, text: isId ? 'Layar' : 'Desktop' },
+        { deg: 30, text: isId ? 'Laptop' : 'Laptop' },
+        { deg: 45, text: isId ? 'HP' : 'Phone' },
+        { deg: 60, text: isId ? 'Bungkuk' : 'Slump' }
       ];
       ctx.font = '500 10.5px Inter, sans-serif';
       ctx.fillStyle = '#64748B';
@@ -2017,38 +2018,50 @@
       if (loadVal) loadVal.textContent = `${lbs.toFixed(1)} lbs`;
       if (loadKg) loadKg.textContent = `${kg} kg at ${deg.toFixed(1)}° forward tilt`;
 
+      const isId = typeof currentLang !== 'undefined' && currentLang === 'id';
       if (loadTag) {
         if (deg <= 5) {
-          loadTag.textContent = `Neutral Plumb Line (${mult}x)`;
+          loadTag.textContent = isId ? `Garis Lurus Netral (${mult}x)` : `Neutral Plumb Line (${mult}x)`;
           loadTag.style.background = '#CCFBF1';
           loadTag.style.color = '#0F766E';
         } else if (deg <= 20) {
-          loadTag.textContent = `Mild Muscular Strain (${mult}x)`;
+          loadTag.textContent = isId ? `Ketegangan Otot Ringan (${mult}x)` : `Mild Muscular Strain (${mult}x)`;
           loadTag.style.background = '#FEF3C7';
           loadTag.style.color = '#B45309';
         } else if (deg <= 40) {
-          loadTag.textContent = `Moderate Mechanical Overload (${mult}x)`;
+          loadTag.textContent = isId ? `Beban Mekanis Sedang (${mult}x)` : `Moderate Mechanical Overload (${mult}x)`;
           loadTag.style.background = '#FFEDD5';
           loadTag.style.color = '#C2410C';
         } else {
-          loadTag.textContent = `Severe Cervical Compression (${mult}x)`;
+          loadTag.textContent = isId ? `Kompresi Servikal Berat (${mult}x)` : `Severe Cervical Compression (${mult}x)`;
           loadTag.style.background = '#FEE2E2';
           loadTag.style.color = '#B91C1C';
         }
       }
 
       if (explanation) {
-        if (deg <= 5) {
-          explanation.textContent = 'At 0 degrees, the head sits balanced over the shoulders, exerting only its resting mass of 10 to 12 pounds on the cervical spine.';
-        } else if (deg <= 20) {
-          explanation.textContent = `At ${deg.toFixed(0)} degrees, the cervical lever arm increases head gravitational load to ${lbs.toFixed(1)} lbs, requiring continuous compensatory isometric contraction from the upper trapezius and levator scapulae.`;
-        } else if (deg <= 40) {
-          explanation.textContent = `At ${deg.toFixed(0)} degrees, head load reaches ${lbs.toFixed(1)} lbs (${mult}x baseline). This chronic position accelerates cervical muscle fatigue and forward postural adaptation.`;
+        if (isId) {
+          if (deg <= 5) {
+            explanation.textContent = 'Pada 0 derajat, kepala bertumpu seimbang di atas bahu, hanya memberikan beban alami sekitar 5 kg pada tulang leher.';
+          } else if (deg <= 20) {
+            explanation.textContent = `Pada ${deg.toFixed(0)} derajat, lengan momen tuas servikal meningkatkan beban gravitasi kepala menjadi ${lbs.toFixed(1)} lbs (${kg} kg), menuntut kontraksi isometrik terus-menerus dari otot leher dan trapezius.`;
+          } else if (deg <= 40) {
+            explanation.textContent = `Pada ${deg.toFixed(0)} derajat, beban kepala mencapai ${lbs.toFixed(1)} lbs (${kg} kg, ${mult}x lipat dari normal). Posisi kronis ini memicu kelelahan otot dan perubahan postur.`;
+          } else {
+            explanation.textContent = `Pada ${deg.toFixed(0)} derajat, gaya kompresi mencapai ${lbs.toFixed(1)} lbs (${kg} kg) pada vertebra C1 hingga C7, menyebabkan tekanan regangan berat pada ligamen leher belakang.`;
+          }
         } else {
-          explanation.textContent = `At ${deg.toFixed(0)} degrees, compressive forces reach ${lbs.toFixed(1)} lbs on C1 to C7 vertebrae, generating severe shear strain across posterior cervical ligaments and thoracic erectors.`;
+          if (deg <= 5) {
+            explanation.textContent = 'At 0 degrees, the head sits balanced over the shoulders, exerting only its resting mass of 10 to 12 pounds on the cervical spine.';
+          } else if (deg <= 20) {
+            explanation.textContent = `At ${deg.toFixed(0)} degrees, the cervical lever arm increases head gravitational load to ${lbs.toFixed(1)} lbs, requiring continuous compensatory isometric contraction from the upper trapezius and levator scapulae.`;
+          } else if (deg <= 40) {
+            explanation.textContent = `At ${deg.toFixed(0)} degrees, head load reaches ${lbs.toFixed(1)} lbs (${mult}x baseline). This chronic position accelerates cervical muscle fatigue and forward postural adaptation.`;
+          } else {
+            explanation.textContent = `At ${deg.toFixed(0)} degrees, compressive forces reach ${lbs.toFixed(1)} lbs on C1 to C7 vertebrae, generating severe shear strain across posterior cervical ligaments and thoracic erectors.`;
+          }
         }
       }
-
       renderGraph();
     }
 
@@ -3103,8 +3116,16 @@ function drawProgressChart() {
   const wrap = document.getElementById('progressChartWrap');
   const note = document.getElementById('progressMetricEmpty');
   const m = PROGRESS_METRICS.find(x => x.key === progressMetric);
-  document.getElementById('progressChartHint').textContent = m.hint;
-
+  const isId = typeof currentLang !== 'undefined' && currentLang === 'id';
+  const hintMap = {
+    'score': isId ? 'Semakin tinggi semakin baik. 100 adalah postur ideal.' : 'Higher is better. 100 is ideal posture.',
+    'neck_deviation': isId ? 'Semakin rendah semakin baik. 0° berarti telinga tepat di atas bahu.' : 'Lower is better. 0° means your ear sits directly above your shoulder.',
+    'shoulder_tilt': isId ? 'Semakin rendah semakin baik. 0° berarti bahu sejajar rata.' : 'Lower is better. 0° means level shoulders.',
+    'head_tilt': isId ? 'Semakin rendah semakin baik. 0° berarti kepala tegak seimbang.' : 'Lower is better. 0° means your head sits level.',
+    'shoulder_stability': isId ? 'Semakin rendah semakin baik. Mengukur pergeseran bahu selama tahan 3 detik.' : 'Lower is better. How much your shoulders drift during the 3-second hold.',
+    'head_stability': isId ? 'Semakin rendah semakin baik. Mengukur pergeseran kepala selama tahan 3 detik.' : 'Lower is better. How much your head drifts during the 3-second hold.'
+  };
+  document.getElementById('progressChartHint').textContent = hintMap[m.key] || m.hint;
   const pts = progressScans
     .map(s => ({ s, v: m.get(s) }))
     .filter(p => p.v != null && Number.isFinite(Number(p.v)))
@@ -3201,29 +3222,43 @@ function renderProgress() {
   document.getElementById('progressBody').style.display = has ? 'block' : 'none';
 
   document.getElementById('progTotalScans').textContent = progressScans.length;
+  const isId = typeof currentLang !== 'undefined' && currentLang === 'id';
   const streak = scanStreak(progressScans);
-  document.getElementById('progStreak').textContent = `${streak} day${streak === 1 ? '' : 's'}`;
+  document.getElementById('progStreak').textContent = isId ? `${streak} hari` : `${streak} day${streak === 1 ? '' : 's'}`;
   if (!has) return;
 
   const latest = progressScans[progressScans.length - 1];
   const latestSev = document.getElementById('progLatest');
-  latestSev.textContent = scanSeverity(latest);
-  latestSev.style.color = severityColor(scanSeverity(latest));
+  const rawSev = scanSeverity(latest);
+  const sevMap = {
+    'Normal': isId ? 'Normal' : 'Normal',
+    'Very Mild': isId ? 'Sangat Ringan' : 'Very Mild',
+    'Mild': isId ? 'Ringan' : 'Mild',
+    'Moderate': isId ? 'Sedang' : 'Moderate',
+    'Severe': isId ? 'Berat' : 'Severe'
+  };
+  latestSev.textContent = sevMap[rawSev] || rawSev;
+  latestSev.style.color = severityColor(rawSev);
   document.getElementById('progBestScore').textContent = Math.max(...progressScans.map(computePostureScore));
 
   const chips = document.getElementById('progressChips');
-  if (!chips.children.length) {
-    PROGRESS_METRICS.forEach(m => {
-      const b = h('button', 'chip', m.label);
-      b.type = 'button';
-      b.dataset.metric = m.key;
-      chips.append(b);
-    });
-  }
-  chips.querySelectorAll('.chip').forEach(b => {
-    const on = b.dataset.metric === progressMetric;
+  chips.innerHTML = '';
+  const chipLabelMap = {
+    'score': isId ? 'Skor keseluruhan' : 'Overall score',
+    'neck_deviation': isId ? 'Leher' : 'Neck',
+    'shoulder_tilt': isId ? 'Kemiringan bahu' : 'Shoulder tilt',
+    'head_tilt': isId ? 'Kemiringan kepala' : 'Head tilt',
+    'shoulder_stability': isId ? 'Kestabilan bahu' : 'Shoulder steadiness',
+    'head_stability': isId ? 'Kestabilan kepala' : 'Head steadiness'
+  };
+  PROGRESS_METRICS.forEach(m => {
+    const b = h('button', 'chip', chipLabelMap[m.key] || m.label);
+    b.type = 'button';
+    b.dataset.metric = m.key;
+    const on = m.key === progressMetric;
     b.classList.toggle('active', on);
     b.setAttribute('aria-pressed', on);
+    chips.append(b);
   });
 
   drawProgressChart();
@@ -3888,9 +3923,13 @@ const I18N = {
     graphNotice: 'Hover or drag to inspect the curve',
     graphLoadHeader: 'Compressive load on the neck',
     sliderHeader: 'Adjust Forward Tilt Angle',
-    scanEyebrow: 'Real-time scanner',
-    scanTitle: 'Run an on-device posture screening.',
-    scanDesc: 'Position your camera at eye level. Hold still for three seconds during the stability snapshot to generate your biomechanical report and corrective recommendations.',
+    preset0: '0° Neutral',
+    preset15: '15° Screen',
+    preset30: '30° Laptop',
+    preset45: '45° Phone',
+    preset60: '60° Severe',
+    readingsOverTime: 'Your readings over time',
+    shareLatestBtn: 'Share latest result ↗',
     btnStartCam: 'Start camera',
     btnStopCam: 'Stop camera',
     btnSnapshot: 'Take snapshot & AI evaluation',
@@ -3987,8 +4026,13 @@ const I18N = {
     btnStopCam: 'Hentikan kamera',
     btnSnapshot: 'Ambil snapshot & evaluasi AI',
     camHintDefault: 'Klik "Mulai kamera" di bawah',
-    camHintLoading: 'Mengunduh model postur (hanya saat awal)…',
-    labelNeck: 'Sudut deviasi leher',
+    preset0: '0° Netral',
+    preset15: '15° Layar',
+    preset30: '30° Laptop',
+    preset45: '45° HP',
+    preset60: '60° Berat',
+    readingsOverTime: 'Grafik riwayat Anda',
+    shareLatestBtn: 'Bagikan hasil terbaru ↗',
     labelShoulder: 'Kemiringan bahu',
     labelHead: 'Kemiringan kepala',
     labelShoulderStab: 'Kestabilan bahu',
@@ -4162,8 +4206,20 @@ function applyLanguage(lang) {
   setT('label[for="fbEmail"]', t.fbEmail);
   setT('label[for="fbMsg"]', t.fbMsg);
   setT('#feedbackForm button[type="submit"]', t.fbBtn);
-
   setT('#progressListWrap h4', t.scanRecordTitle);
+  setT('#progress .chart-header h3', t.readingsOverTime);
+  setT('#shareProgressBtn', t.shareLatestBtn);
+
+  const presets = document.querySelectorAll('.presets-row .preset-btn');
+  if (presets[0]) presets[0].textContent = t.preset0;
+  if (presets[1]) presets[1].textContent = t.preset15;
+  if (presets[2]) presets[2].textContent = t.preset30;
+  if (presets[3]) presets[3].textContent = t.preset45;
+  if (presets[4]) presets[4].textContent = t.preset60;
+
+  // Redraw graph so canvas text (Optimal, Mild, Desktop, etc.) matches language
+  if (typeof renderGraph === 'function') renderGraph();
+
   const disc = document.querySelector('.result-note') || document.querySelector('.report p:last-child');
   if (disc && disc.textContent.includes('Screening only')) disc.textContent = t.disclaimerText;
 
