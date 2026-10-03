@@ -1152,6 +1152,9 @@
       <a href="#progress" id="progressNav">My Progress</a>
     </div>
     <div class="nav-actions">
+      <button class="btn btn-ghost" id="langToggleBtn" onclick="window.toggleLanguage()" style="padding:6px 12px; font-size:12px; font-family:var(--font-mono); font-weight:600; color:var(--turquoise-dark); border-color:var(--line-turquoise);" aria-label="Ganti Bahasa">
+        🌐 ID
+      </button>
       <a href="https://github.com/LaSserafim/mediaspine" target="_blank" rel="noopener noreferrer" class="github-pill" aria-label="MediaSpine on GitHub">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
       </a>
@@ -3851,15 +3854,218 @@ async function handleSharedRoute() {
   }
 }
 
+const I18N = {
+  en: {
+    langBtn: '🌐 ID',
+    navGraph: 'Spine Graph',
+    navScan: 'Scan',
+    navBenefits: 'Benefits',
+    navTesting: 'Testing',
+    navFeedback: 'Feedback',
+    navProgress: 'My Progress',
+    heroBadge: 'SpineSafe NGO Platform · Open Source',
+    heroTitle: 'Clinical posture screening, measured on-device.',
+    heroLede: 'Screen your neck angle, shoulder symmetry, and postural stability directly in your browser. Powered by 2D computer vision and clinical inference. Zero video frames uploaded.',
+    heroBtnStart: 'Start free scan →',
+    heroBtnGraph: 'Explore cervical load graph',
+    heroPrivacy: '<strong>Private by design.</strong> Your webcam video is processed locally in your browser memory and never sent to a server. Only five numerical angles are interpreted.',
+    statUsers: 'Google Accounts Recorded',
+    statWeekly: 'Weekly Active Users (min 1x/wk)',
+    statToday: 'Users Active Today',
+    statFrames: 'Video Frames Uploaded (On-Device)',
+    graphEyebrow: 'Interactive biomechanics',
+    graphTitle: 'The physics of forward head posture.',
+    graphDesc: 'As the cervical spine tilts forward from the neutral vertical plumb line, gravitational torque multiplies compressive load on cervical vertebrae C1 through C7.',
+    graphNotice: 'Hover or drag to inspect the curve',
+    graphLoadHeader: 'Compressive load on the neck',
+    sliderHeader: 'Adjust Forward Tilt Angle',
+    scanEyebrow: 'Real-time scanner',
+    scanTitle: 'Run an on-device posture screening.',
+    scanDesc: 'Position your camera at eye level. Hold still for three seconds during the stability snapshot to generate your biomechanical report and corrective recommendations.',
+    btnStartCam: 'Start camera',
+    btnStopCam: 'Stop camera',
+    btnSnapshot: 'Take snapshot & AI evaluation',
+    camHintDefault: 'Click "Start camera" below',
+    camHintLoading: 'Downloading posture model (first time only)…',
+    labelNeck: 'Neck deviation angle',
+    labelShoulder: 'Shoulder tilt',
+    labelHead: 'Head tilt',
+    labelShoulderStab: 'Shoulder stability',
+    labelHeadStab: 'Head stability',
+    reportSummaryEye: 'Your result',
+    reportSeverityEye: 'Severity',
+    causesTitle: 'What may be causing this',
+    risksTitle: 'What could happen next',
+    recsTitle: 'What to do',
+    csvExport: 'Download CSV summary',
+    resetScan: 'Run another scan',
+    shareCard: 'Share score card ↗',
+    progEyebrow: 'Your record',
+    progTitle: 'My Progress',
+    progDesc: 'Every scan you take is recorded here in your history with date, time, and clinical metrics.',
+    progTotal: 'Total scans',
+    progLatest: 'Latest severity',
+    progBest: 'Best score',
+    progStreak: 'Scan streak',
+    progEmpty: 'No scans recorded yet. Complete your first scan above to start your record.',
+    benefitsEyebrow: 'Core benefits',
+    benefitsTitle: 'Designed for students and desk workers.',
+    benefitsDesc: 'MediaSpine replaces guesswork with repeatable biomechanical data, grounded in musculoskeletal physiology.'
+  },
+  id: {
+    langBtn: '🌐 EN',
+    navGraph: 'Grafik Tulang Belakang',
+    navScan: 'Pindai',
+    navBenefits: 'Manfaat',
+    navTesting: 'Pengujian',
+    navFeedback: 'Masukan',
+    navProgress: 'Progres Saya',
+    heroBadge: 'Platform LSM SpineSafe · Sumber Terbuka',
+    heroTitle: 'Skrining postur klinis, diukur langsung di perangkat Anda.',
+    heroLede: 'Periksa sudut leher, simetri bahu, dan kestabilan postur langsung di peramban Anda. Ditenagai visi komputer 2D dan analisis klinis. Nol bingkai video yang diunggah.',
+    heroBtnStart: 'Mulai pemindaian gratis →',
+    heroBtnGraph: 'Jelajahi grafik beban servikal',
+    heroPrivacy: '<strong>Privasi terjaga.</strong> Video kamera web Anda diproses secara lokal di memori peramban dan tidak pernah dikirim ke server. Hanya data sudut numerik yang dianalisis.',
+    statUsers: 'Akun Google Terdaftar',
+    statWeekly: 'Pengguna Aktif Mingguan (min 1x/mgg)',
+    statToday: 'Pengguna Aktif Hari Ini',
+    statFrames: 'Bingkai Video Diunggah (Di Perangkat)',
+    graphEyebrow: 'Biomekanika interaktif',
+    graphTitle: 'Fisika postur kepala condong ke depan.',
+    graphDesc: 'Saat tulang leher condong ke depan dari garis lurus netral, torsi gravitasi melipatgandakan beban kompresi pada ruas tulang belakang servikal C1 hingga C7.',
+    graphNotice: 'Arahkan kursor atau geser untuk melihat kurva',
+    graphLoadHeader: 'Beban kompresi pada leher',
+    sliderHeader: 'Sesuaikan Sudut Kecondongan',
+    scanEyebrow: 'Pemindai waktu-nyata',
+    scanTitle: 'Lakukan skrining postur di perangkat.',
+    scanDesc: 'Posisikan kamera sejajar mata. Tahan posisi selama tiga detik saat pemindaian stabilitas untuk mendapatkan laporan biomekanika dan rekomendasi latihan.',
+    btnStartCam: 'Mulai kamera',
+    btnStopCam: 'Hentikan kamera',
+    btnSnapshot: 'Ambil snapshot & evaluasi AI',
+    camHintDefault: 'Klik "Mulai kamera" di bawah',
+    camHintLoading: 'Mengunduh model postur (hanya saat awal)…',
+    labelNeck: 'Sudut deviasi leher',
+    labelShoulder: 'Kemiringan bahu',
+    labelHead: 'Kemiringan kepala',
+    labelShoulderStab: 'Kestabilan bahu',
+    labelHeadStab: 'Kestabilan kepala',
+    reportSummaryEye: 'Hasil Anda',
+    reportSeverityEye: 'Tingkat Keparahan',
+    causesTitle: 'Kemungkinan penyebab',
+    risksTitle: 'Dampak jangka panjang',
+    recsTitle: 'Langkah perbaikan',
+    csvExport: 'Unduh ringkasan CSV',
+    resetScan: 'Pindai ulang',
+    shareCard: 'Bagikan kartu skor ↗',
+    progEyebrow: 'Catatan Anda',
+    progTitle: 'Progres Saya',
+    progDesc: 'Setiap pemindaian yang Anda lakukan tersimpan di sini lengkap dengan tanggal, waktu, dan metrik klinis.',
+    progTotal: 'Total pemindaian',
+    progLatest: 'Tingkat keparahan terbaru',
+    progBest: 'Skor terbaik',
+    progStreak: 'Hari beruntun',
+    progEmpty: 'Belum ada catatan pemindaian. Lakukan pemindaian pertama Anda di atas untuk memulai.',
+    benefitsEyebrow: 'Manfaat utama',
+    benefitsTitle: 'Dirancang untuk pelajar dan pekerja meja.',
+    benefitsDesc: 'MediaSpine menggantikan perkiraan dengan data biomekanika terukur yang berdasar pada fisiologi muskuloskeletal.'
+  }
+};
+
+let currentLang = localStorage.getItem('mediaspine_lang') || 'en';
+
+function applyLanguage(lang) {
+  currentLang = lang;
+  try { localStorage.setItem('mediaspine_lang', lang); } catch (e) {}
+  if (document.documentElement) document.documentElement.lang = lang;
+  const t = I18N[lang] || I18N.en;
+  const setT = (sel, val, isHtml = false) => {
+    const el = document.querySelector(sel);
+    if (el) {
+      if (isHtml) el.innerHTML = val;
+      else el.textContent = val;
+    }
+  };
+
+  setT('#langToggleBtn', t.langBtn);
+  setT('a[href="#graph"]', t.navGraph);
+  setT('a[href="#scan"]', t.navScan);
+  setT('a[href="#benefits"]', t.navBenefits);
+  setT('a[href="#testimony"]', t.navTesting);
+  setT('a[href="#feedback"]', t.navFeedback);
+  setT('#progressNav', t.navProgress);
+
+  setT('.hero-badge', t.heroBadge);
+  setT('.hero h1', t.heroTitle);
+  setT('.hero .lede', t.heroLede);
+  setT('.hero-ctas .btn-primary', t.heroBtnStart);
+  setT('.hero-ctas .btn-ghost', t.heroBtnGraph);
+  setT('.hero-privacy-note', t.heroPrivacy, true);
+
+  setT('#platformTotalUsers + .label', t.statUsers);
+  setT('#platformActiveWeekly + .label', t.statWeekly);
+  setT('#platformActiveToday + .label', t.statToday);
+  setT('.stats-grid .stat-card:last-child .label', t.statFrames);
+
+  setT('#graph .eyebrow', t.graphEyebrow);
+  setT('#graph h2', t.graphTitle);
+  setT('#graph .section-head p', t.graphDesc);
+  setT('#canvasScanNotice', t.graphNotice);
+  setT('.graph-readout .slider-header span', t.graphLoadHeader);
+  setT('.slider-wrap .slider-header span:first-child', t.sliderHeader);
+
+  setT('#scan .eyebrow', t.scanEyebrow);
+  setT('#scan h2', t.scanTitle);
+  setT('#scan .section-head p', t.scanDesc);
+  if (startBtn && startBtn.textContent.includes('Start')) startBtn.textContent = t.btnStartCam;
+  if (startBtn && startBtn.textContent.includes('Stop')) startBtn.textContent = t.btnStopCam;
+  setT('#snapshotBtn', t.btnSnapshot);
+  if (camHint && camHint.textContent.includes('Start camera')) camHint.textContent = t.camHintDefault;
+
+  const labels = document.querySelectorAll('#sideMetrics .label');
+  if (labels[0]) labels[0].textContent = t.labelNeck;
+  if (labels[1]) labels[1].textContent = t.labelShoulder;
+  if (labels[2]) labels[2].textContent = t.labelHead;
+  if (labels[3]) labels[3].textContent = t.labelShoulderStab;
+  if (labels[4]) labels[4].textContent = t.labelHeadStab;
+
+  setT('.report-summary .eyebrow', t.reportSummaryEye);
+  setT('.severity-box .eyebrow', t.reportSeverityEye);
+  setT('.report-cell:nth-child(1) h4', t.causesTitle);
+  setT('.report-cell:nth-child(2) h4', t.risksTitle);
+  setT('.report-cell:nth-child(3) h4', t.recsTitle);
+  setT('#csvBtn', t.csvExport);
+  setT('#resetBtn', t.resetScan);
+  setT('#shareResultBtn', t.shareCard);
+
+  setT('#progress .eyebrow', t.progEyebrow);
+  setT('#progress h2', t.progTitle);
+  setT('#progress .section-head p', t.progDesc);
+  setT('.progress-stat-card:nth-child(1) .label', t.progTotal);
+  setT('.progress-stat-card:nth-child(2) .label', t.progLatest);
+  setT('.progress-stat-card:nth-child(3) .label', t.progBest);
+  setT('.progress-stat-card:nth-child(4) .label', t.progStreak);
+  setT('#progressEmpty p', t.progEmpty);
+
+  setT('#benefits .eyebrow', t.benefitsEyebrow);
+  setT('#benefits h2', t.benefitsTitle);
+  setT('#benefits .section-head p', t.benefitsDesc);
+}
+
+window.toggleLanguage = function() {
+  applyLanguage(currentLang === 'en' ? 'id' : 'en');
+};
+
 if (typeof window !== 'undefined') {
   window.addEventListener('hashchange', handleSharedRoute);
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       handleSharedRoute();
+      applyLanguage(currentLang);
       if (typeof window.loadProgressData === 'function') window.loadProgressData();
     });
   } else {
     handleSharedRoute();
+    applyLanguage(currentLang);
     if (typeof window.loadProgressData === 'function') window.loadProgressData();
   }
 }
