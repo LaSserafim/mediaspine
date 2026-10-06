@@ -3037,7 +3037,7 @@ function h(tag, cls, text) {
 }
 
 const fmtDate = d => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-const fmtTime = d => d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+const fmtTime = d => d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false });
 const fmtMetric = (m, v) => v.toFixed(m.dec) + m.unit;
 const stabWord = v => STAB_WORDS[v <= 0.03 ? 0 : v <= 0.06 ? 1 : v <= 0.10 ? 2 : 3];
 
