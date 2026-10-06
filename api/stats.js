@@ -55,10 +55,21 @@ export default async function handler(req, res) {
     const todayStr = now.toISOString().slice(0, 10);
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-    // 1. Total distinct signed-in users across all history
-    const allUsers = new Set(records.map(r => r.user_id).filter(Boolean));
-    const totalUsers = allUsers.size;
+    // 1. Total registered accounts: Read directly from Supabase Auth admin API, fallback to user_activity distinct count
+    let totalUsers = 0;
+    try {
+      const { data: authData, error: authError } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      if (!authError && authData?.users) {
+        totalUsers = authData.users.length;
+      }
+    } catch (e) {
+      console.warn('[Supabase admin.listUsers error]', e);
+    }
 
+    if (!totalUsers) {
+      const allUsers = new Set(records.map(r => r.user_id).filter(Boolean));
+      totalUsers = allUsers.size;
+    }
     // 2. Weekly Active Users: distinct users with at least 1 session in the past 7 days (min 1x/week)
     const weeklyUsers = new Set(
       records
