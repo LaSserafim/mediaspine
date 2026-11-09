@@ -98,7 +98,15 @@ The graph renders on an HTML5 canvas scaled by `window.devicePixelRatio` for sha
 ## Project Structure
 
 ```
-index.html                      Single-page application (HTML, CSS, JavaScript)
+index.html                      Application markup and section structure
+style.css                       Clinical design system and responsive layout styling
+src/main.js                     Application coordinator and route initializer
+src/scanner.js                  MediaPipe Pose tracking, camera lifecycle, and scoring engine
+src/graph.js                    Interactive high-DPI cervical load model (Kapandji-Hansraj)
+src/progress.js                 Patient history tracking, trend charts, and CSV exporter
+src/card.js                     1080x1350 score card canvas generator and modal controller
+src/i18n.js                     Bilingual dictionary (English and Bahasa Indonesia)
+src/auth.js                     Supabase authentication and session synchronization
 api/evaluate.js                 DeepSeek API proxy with input validation and rate limiting
 api/activity.js                 Records daily user sessions in Supabase
 api/stats.js                    Aggregates registered and active user counts from Supabase

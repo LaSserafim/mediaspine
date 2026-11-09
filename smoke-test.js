@@ -154,6 +154,9 @@ if (targetUrl) {
     eval(scriptMatch[1]);
     console.log('✅ Top-level script executes cleanly with zero errors');
   }
+  if (fs.existsSync('src/main.js')) {
+    console.log('✅ Modular application architecture verified (src/main.js present)');
+  }
 
   console.log('\n--- [2/3] Checking api/evaluate.js DeepSeek Model ---');
   const evaluateJs = fs.readFileSync('api/evaluate.js', 'utf8');
